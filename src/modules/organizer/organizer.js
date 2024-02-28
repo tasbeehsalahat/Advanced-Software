@@ -1,9 +1,10 @@
 const { authenticateJWT } = require('../middleware/middleware.js');
-const {filter,createTask} = require('./organizer.controller.js');
+const {filter,createTask,notification} = require('./organizer.controller.js');
 const router = require('express').Router();
 
 router.get('/filter',filter);
-router.get('/tasks',createTask)
+router.get('/notification',authenticateJWT,notification);
+
 module.exports = router;
 
 

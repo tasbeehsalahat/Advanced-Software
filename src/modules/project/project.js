@@ -3,8 +3,8 @@ const {addproject,deleteproject,updateproject,getproject} = require('./project.c
 const router = require('express').Router();
 
 router.post('/projects',authenticateJWT, addproject);
-router.delete('/project', deleteproject);
-router.put('/project', updateproject);
+router.delete('/project', authenticateJWT,deleteproject);
+router.put('/project', authenticateJWT,updateproject);
 router.get('/project',authenticateJWT, getproject);
 
 module.exports = router;

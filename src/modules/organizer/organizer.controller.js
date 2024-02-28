@@ -11,9 +11,14 @@ const filter = async function(req, res) {
     const params = []; // Array to store parameter values for prepared statement
 
     if (skills) {
-        sql += ' AND FIND_IN_SET(?, skills)'; // Add condition to filter by skills
-        params.push(skills); // Add skills to parameters array
-        console.log('Received skills:', skills);
+        const skillList = skills.split(',').map(skill => skill.trim()); // Split skills string into an array using ',' as separator
+        const placeholders = skillList.map(() => '?').join(','); // Create placeholders for each skill
+        sql += ` AND (`;
+        sql += skillList.map(() => `FIND_IN_SET(?, skills)`).join(' OR '); // Use FIND_IN_SET for each skill and concatenate with OR
+        sql += `)`;
+        params.push(...skillList); // Add each skill to parameters array
+        console.log('Received skills:', skillList);
+        console.log(placeholders);
     }
 
     if (materials) {
@@ -42,29 +47,26 @@ const filter = async function(req, res) {
         return res.json(results); // Return filtered projects
     });
 };
+const notification= async(req,res) => {
 
-let tasks = []; // Array to store tasks
-
-const createTask = (req, res) => {
-    const { projectId, title, description, assignee } = req.body;
-    const taskId = uuidv4(); // Generate unique task ID
-
-    // Construct the SQL INSERT statement
-    const sql = 'INSERT INTO tasks (taskId, projectId, title, description, assignee) VALUES (?, ?, ?, ?, ?)';
-    const params = [taskId, projectId, title, description, assignee]; // Parameter values for prepared statement
-
-    // Execute the SQL INSERT statement
-    connection.execute(sql, params, (error, result) => {
-        if (error) {
-            console.error('Error creating task:', error);
-            return res.status(500).json({ error: 'Internal server error' });
+    try {
+        if(req.user.role=='crafter' ){
+            return res.json("you cannot access this page")
         }
+        const sql = `SELECT * FROM user_projects where status='pending'`;
 
-        // Task created successfully
-        console.log('Task created successfully:', taskId);
-        res.status(201).json({ taskId, projectId, title, description, assignee });
-    });
-};
+        connection.execute(sql, (err, result) => {
+            if (err) {
+                return res.json(err);
+            }
+            return res.json({ Notifications: result });
+        });
+    } catch (err) {
+        return res.json(err);
+    }
 
 
-module.exports = { filter ,createTask};
+
+
+}
+module.exports = { filter ,notification};

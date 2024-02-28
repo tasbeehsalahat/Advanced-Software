@@ -1,11 +1,11 @@
 const connection = require("../../../DB/connection.js");
 const addproject = async function(req, res){
-    const {title, description, level, materials, size, comments, crafter_email, skills} = await req.body;
+    const {title, description, level, materials, size, comments, organizer_email, skills} = await req.body;
     try{     
-        if(req.user.role!='admin' ){
+        if(req.user.role=='crafter' ){
             return res.json("you cannot access this page")
         }
-    const sql = `INSERT INTO project (title,description,level,materials,size,comments,crafter_email,skills) VALUES ('${title}', '${description}', '${level}','${materials}','${size}','${comments}','${crafter_email}','${skills}') `   
+    const sql = `INSERT INTO project (title,description,level,materials,size,comments,organizer_email,skills) VALUES ('${title}', '${description}', '${level}','${materials}','${size}','${comments}','${organizer_email}','${skills}') `   
    connection.execute(sql,(err, result) => {
     if(err){
        if(err.errno==1452) {
@@ -26,6 +26,9 @@ const addproject = async function(req, res){
 const deleteproject =  function(req, res){
     const { id } = req.body;
      try{     
+        if(req.user.role=='crafter' ){
+            return res.json("you cannot access this page")
+        }
         const sql = `DELETE FROM project WHERE id = '${id}'`;
          // Execute the SQL query
          connection.execute(sql, (err, result) => {
@@ -47,7 +50,9 @@ const deleteproject =  function(req, res){
 
  const updateproject = async function(req, res) {
     const { id, title, description, level, materials, size, comments, skills } = req.body;
-
+    if(req.user.role=='crafter' ){
+        return res.json("you cannot access this page")
+    }
     const sql = `UPDATE project
                  SET title='${title}', description='${description}', level=${level}, materials='${materials}', size=${size}, comments='${comments}', skills='${skills}'
                  WHERE id=${id}`;
@@ -63,8 +68,8 @@ const deleteproject =  function(req, res){
 const getproject = function(req, res) {
     try {
         // Check if the user is not an admin
-        if (req.user.role !== 'admin') {
-            return res.json("You cannot access this page");
+        if(req.user.role=='crafter' ){
+            return res.json("you cannot access this page")
         }
         // Construct the SQL query to select all project details
         const sql = 'SELECT * FROM project';
