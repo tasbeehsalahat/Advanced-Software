@@ -7,7 +7,7 @@ const app = express(); // Creating an instance of Express application
 
 app.use(bodyParser.json());
 
-const { JWT_SECRET_KEY } = require('./../middleware/middleware.js');
+const { JWT_SECRET_KEY } = require('../middleware/middleware.js');
 const bcrypt = require('bcrypt');
 
 const login = async (req, res) => {
