@@ -76,6 +76,48 @@ const shownotification = async (req, res) => {
     }
 };
 
-module.exports = shownotification;
+const match = async function (req, res) {
+    try {
+        if (req.user.role !== 'crafter') {
+            return res.json("You cannot access this page");
+        }
 
-module.exports = {updateuser,join,shownotification} ;
+        const email = req.user.email;
+
+        const sql1 = `SELECT skills, intrests FROM users WHERE email = "${email}"`;
+        connection.execute(sql1, (err, rlt) => {
+         
+            if (err) {
+                console.log("Error executing SQL query:", err);
+                return res.status(500).json({ error: "Database error" });
+            }
+
+            if (rlt.length === 0) {
+                return res.json({ message: "No matching user found" });
+            }
+
+            const userskills = rlt[0].skills;
+            const intrests = rlt[0].intrests;
+
+            const sql2 = `SELECT email, skills FROM users WHERE skills = ? AND intrests = ? AND email != ? AND role!="organizer"`;
+
+            connection.execute(sql2, [userskills, intrests, email], (err, results) => {
+                if (err) {
+                    console.log("Error executing SQL query:", err);
+                    return res.status(500).json({ error: "Database error" });
+                }
+
+                if (results.length === 0) {
+                    return res.json({ message: "No matching crafters found" });
+                }
+
+                return res.json({ Matching_Crafters: results });
+            });
+        });
+    } catch (err) {
+        console.log("Internal server error:", err);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+module.exports = {updateuser,join,shownotification,match} ;
