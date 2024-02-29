@@ -2,7 +2,6 @@ const connection = require('./../../../DB/connection.js');
 const bcrypt = require('bcrypt');
 
 const updateuser = async (request, response) =>{
- 
     const { UserName, skills, intrests,password, email } = request.body;
     const hashpass= await bcrypt.hash(password,10);
     if(request.user.role='organizer'){
