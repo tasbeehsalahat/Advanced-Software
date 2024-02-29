@@ -24,10 +24,8 @@ const notification = async (req, res) => {
                     )
                 )`;
 
-            // Add parameters for organizer's email
             params = [req.user.email, req.user.email, req.user.email];
         } else {
-            // For other roles, simple query
             sql = `SELECT * FROM user_projects WHERE status='pending'`;
         }
 
@@ -36,7 +34,6 @@ const notification = async (req, res) => {
                 return res.json(err);
             }
 
-            // Handle accept/reject actions
             if (status === 'accept' || status === 'reject') {
                 const updateStatus = (status === 'accept') ? 'accept' : 'reject';
                 const sql2 = `UPDATE user_projects SET status=? WHERE user_email=?`;

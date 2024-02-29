@@ -1,6 +1,6 @@
 const express = require('express');
 const connection = require('../../../DB/connection.js');
-const {addCrafter,getCrafter,deactivateUser} = require('./admin.controller.js');
+const {addCrafter,getCrafter,deactivateUser,featured} = require('./admin.controller.js');
 const { authenticateJWT } = require('../middleware/middleware.js');
 const { updateuser} = require('../users/user.controller.js');
 const notification = require('../services/notification.js');
@@ -12,5 +12,6 @@ app.put("/userinfo",authenticateJWT,updateuser);
 
 app.put('/status',authenticateJWT,deactivateUser);
 app.get('/notification',authenticateJWT,notification);
+app.get('/featured projects.',authenticateJWT,featured);
 
 module.exports= app ;

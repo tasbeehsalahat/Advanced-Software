@@ -67,19 +67,13 @@ const deleteproject =  function(req, res){
 
 const getproject = function(req, res) {
     try {
-        // Check if the user is not an admin
-        if(req.user.role=='crafter' ){
-            return res.json("you cannot access this page")
-        }
-        // Construct the SQL query to select all project details
+        
         const sql = 'SELECT * FROM project';
 
-        // Execute the SQL query
         connection.execute(sql, (err, result) => {
             if (err) {
                 return res.json(err);
             }
-            // Return the project details
             return res.json({ projects: result });
         });
     } catch (err) {
