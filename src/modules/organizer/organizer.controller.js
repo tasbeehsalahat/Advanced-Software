@@ -47,26 +47,5 @@ const filter = async function(req, res) {
         return res.json(results); // Return filtered projects
     });
 };
-const notification= async(req,res) => {
 
-    try {
-        if(req.user.role=='crafter' ){
-            return res.json("you cannot access this page")
-        }
-        const sql = `SELECT * FROM user_projects where status='pending'`;
-
-        connection.execute(sql, (err, result) => {
-            if (err) {
-                return res.json(err);
-            }
-            return res.json({ Notifications: result });
-        });
-    } catch (err) {
-        return res.json(err);
-    }
-
-
-
-
-}
-module.exports = { filter ,notification};
+module.exports = { filter };

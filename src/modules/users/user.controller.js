@@ -26,13 +26,17 @@ const updateuser = async (request, response) =>{
 const join = async (req, res) => {
     try{
     const { user_email, project_title } = req.body;
-
+    if(req.user.role !='crafter'){
+        return response.json("you cannot access this page")
+    }
     const sql = 'INSERT INTO user_projects(user_email, project_title, status) VALUES (?, ?, ?)';
     const params = [user_email, project_title, 'pending'];
 
     connection.execute(sql, params, (error, result) => {
         if (error) {
-           
+           if (error.errno==1062){
+            return res.json({massege : "You already sent join request"})
+           }
                 return res.json( error) ;
  
         }
@@ -41,7 +45,8 @@ const join = async (req, res) => {
     });
 }
 catch(err){
-    return res.status(500).json({ error: 'error' });
+    const error =err.stack ;
+    return res.json({error});
 
 }
 };

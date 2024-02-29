@@ -3,6 +3,7 @@ const router = require('express').Router();
 const { authenticateJWT } = require('../middleware/middleware.js');
 
 router.put('/user', authenticateJWT,updateuser);
-router.post('/user',join)
+router.post('/user',authenticateJWT,join);
+router.get('/show',)
 module.exports = router;
 
