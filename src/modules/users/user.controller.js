@@ -118,5 +118,21 @@ const match = async function (req, res) {
         return res.status(500).json({ error: "Internal server error" });
     }
 };
+const informations=async function (req,res){
+    const user_email=req.params.useremail
+    const sql=`SELECT UserName,email,skills,intrests from users where email="${user_email}" AND role="crafter"`
+    connection.execute(sql,(error,result)=>{
+    if (error) {
+        return response.json(error);
+    }
 
-module.exports = {updateuser,join,shownotification,match} ;
+else {
+   return res.json({result});
+}
+
+
+
+    })
+
+}
+module.exports = {updateuser,join,shownotification,match,informations} ;

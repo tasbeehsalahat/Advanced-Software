@@ -25,24 +25,28 @@ const notification = async (req, res) => {
                 )`;
 
             params = [req.user.email, req.user.email, req.user.email];
-        } else {
+        } 
+        else {
             sql = `SELECT * FROM user_projects WHERE status='pending'`;
         }
 
         connection.execute(sql, params, (err, result) => {
             if (err) {
-                return res.json(err);
+                return res.json(err); 
             }
-
-            if (status === 'accept' || status === 'reject') {
+               
+ if (status === 'accept' || status === 'reject') {
                 const updateStatus = (status === 'accept') ? 'accept' : 'reject';
-                const sql2 = `UPDATE user_projects SET status=? WHERE user_email=?`;
 
-                connection.execute(sql2, [updateStatus, user_email], (erro, rlt) => {
+                
+                const sql2 = `UPDATE user_projects SET status=? WHERE user_email=?`;
+   connection.execute(sql2, [updateStatus, user_email], (erro, rlt) => {
                     if (erro) return res.json({ error: erro });
                     return res.json({ message: `${updateStatus.charAt(0).toUpperCase() + updateStatus.slice(1)}ed successfully` });
                 });
-            } else if (result.length === 0) {
+            } 
+         
+           else if (result.length === 0) {
                 return res.json({ notification: "No join request" });
             } else {
                 return res.json({ notification: result });

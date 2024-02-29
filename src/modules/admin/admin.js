@@ -13,5 +13,5 @@ app.put('/status',authenticateJWT,deactivateUser);
 app.get('/notification',authenticateJWT,notification);
 app.get('/featured projects.',authenticateJWT,featured);
 
-
 module.exports= app ;
+////////////////////////////////
