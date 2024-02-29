@@ -5,6 +5,6 @@ const connection = sql.createConnection({ // named parameter so i rearrange , do
    password : '',
    database : 'craft_db'
 
-   
 })
+
 module.exports = connection;
