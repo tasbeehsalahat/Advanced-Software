@@ -51,5 +51,31 @@ catch(err){
 }
 };
 
+const shownotification = async (req, res) => {
+    try {
+        if (req.user.role !== 'crafter') {
+            return res.json("You cannot access this page");
+        }
 
-module.exports = {updateuser,join} ;
+        const userEmail = req.user.email;
+
+        const sql = ` SELECT project_title, status  FROM user_projects WHERE user_email = ? `;
+
+        connection.execute(sql, [userEmail], (err, results) => {
+            if (err) {
+                return res.status(500).json({ error: "Database error" });
+            }
+            if(results.length==0){
+                return res.json({message:"no notification"})
+            }
+
+            return res.json({ projects: results });
+        });
+    } catch (err) {
+        return res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+module.exports = shownotification;
+
+module.exports = {updateuser,join,shownotification} ;
