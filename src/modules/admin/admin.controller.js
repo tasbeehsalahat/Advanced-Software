@@ -7,6 +7,12 @@ const addCrafter = async function(req, res){
         if(req.user.role!='admin'){
             return res.json("you cannot access this page")
         }   
+        if (!email || !email.includes('@') || !email.endsWith('.com')) {
+            return res.status(400).json({  message: 'Invalid email format' });
+        }
+        if (!password || !password.match(/^(?=.*[a-zA-Z])(?=.*[0-9])/)) {
+            return res.status(400).json({  message: 'Password must contain both letters and numbers' });
+        }
    const sql = `INSERT INTO users (email,UserName, password, skills, role,intrests) VALUES ('${email}', '${UserName}', '${hashedPassword}','${skills}','${role}','${intrests}') `   
    connection.execute(sql,(err, result) => {
        if(err) {
