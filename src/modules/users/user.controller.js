@@ -1,80 +1,36 @@
-<<<<<<< HEAD
-
-const connection= require('./../../../DB/connection');
-
-const updated = function(request, response) {
-    const { UserName, skills, intrests, role, password, email } = request.body;
-
-    const sql = `UPDATE users 
-                 SET UserName='${UserName}', skills='${skills}', intrests='${intrests}', role='${role}', password='${password}'
-                 WHERE email='${email}'`;
-                 
-    connection.execute(sql, function(error, result) {
-        if (error) {
-            return response.json(error);
-        }
-        return response.json("updated successfully");
-    });
-};
-
-module.exports = updated;
-=======
 const connection = require('./../../../DB/connection.js');
 const bcrypt = require('bcrypt');
 
 const updateuser = async (request, response) => {
-    const { UserName, skills, intrests, password, email } = request.body;
+    const {...otherUpdates} = request.body;
     const userEmail = request.params.email; // Correctly access email from request parameters
 
     if (request.user.role === 'organizer') {
         return response.json("You cannot access this page");
     } 
     else if (request.user.role === 'admin') {
-        if(request.body.length!=0){
-            const updateFields = Object.keys(request.body).map(key => `${key} = ${request.body[key]}`).join(', ');
-            const updateQuery = `UPDATE users SET ${updateFields} WHERE email = "${request.body.email}"`;
-            
-            const values = [...Object.values(request.body),userEmail ];
-            
-            connection.execute(updateQuery, values, (error, results) => {
+        const sql = `UPDATE users SET ${Object.entries(otherUpdates).map(([key, value]) => `${key} = "${value}"`).join(', ')} WHERE email = '${ request.body.email}';`;
+            connection.execute(sql,  (error, results) => {
               if (error) {
                 return response.json(error)
               }
-            return response.json("updated succesfully")
+            return response.json({massege:"updated succesfully"})
             
             })
-        }
-        const sql = `SELECT * FROM users WHERE email="${userEmail}"`; 
-        connection.execute(sql, function (error, result) {
-       
-        if (error) {
-                        return response.json(error);
-                    }
-                    return response.json(result); 
-                });
+        
             
-            } 
+        } 
         else if (request.user.role === 'crafter') {
-        const sql = `SELECT * FROM users WHERE email="${userEmail}"`;
-        connection.execute(sql, function (error, result) {
-            if (error) {
-                return response.json(error);
-            }
-            if (result.length > 0) {
-                // Crafter's own information found, attempt to update
-                const updateSql = `UPDATE users 
-                    SET UserName='${UserName}', skills='${skills}', intrests='${intrests}', password='${password}'
-                    WHERE email='${email}'`;
-                connection.execute(updateSql, function (error, result) {
-                    if (error) {
-                        return response.json(error);
-                    }
-                    return response.json("Updated successfully");
-                });
-            } else {
-                return response.json("Crafter information not found");
-            }
-        });
+            const sql = `UPDATE users SET ${Object.entries(otherUpdates).map(([key, value]) => `${key} = "${value}"`).join(', ')} WHERE email = '${request.user.email}';`;
+            connection.execute(sql,  (error, results) => {
+              if (error) {
+                return response.json(error)
+              }
+            return response.json({massege:"updated succesfully"})
+            
+            })
+        
+            
     } else {
         return response.json("Unknown role");
     }
@@ -192,4 +148,3 @@ else {
 
 }
 module.exports = {updateuser,join,shownotification,match,informations} ;
->>>>>>> 821882947a6686f7ce3658491a700ec0f0dc8bd4

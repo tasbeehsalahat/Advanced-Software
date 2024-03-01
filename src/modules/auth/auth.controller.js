@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-const connection = require("../../../DB/connection.js");
-const jwt = require('jsonwebtoken');
-=======
 const express = require('express');
 const connection = require("../../../DB/connection.js");
 const jwt = require('jsonwebtoken');
@@ -11,7 +7,6 @@ const app = express(); // Creating an instance of Express application
 
 app.use(bodyParser.json());
 
->>>>>>> 821882947a6686f7ce3658491a700ec0f0dc8bd4
 const { JWT_SECRET_KEY } = require('./../middleware/middleware.js');
 const bcrypt = require('bcrypt');
 
@@ -30,12 +25,9 @@ const login = async (req, res) => {
             if (!user) {
                 return res.status(401).json({ message: 'Invalid email or password' });
             }
-<<<<<<< HEAD
-=======
             if (user.status === 'deactivated') {
                 return res.status(403).json({ message: 'Account is deactivated' });
               }
->>>>>>> 821882947a6686f7ce3658491a700ec0f0dc8bd4
 
             const token = jwt.sign({ email: user.email, role: user.role }, JWT_SECRET_KEY, { expiresIn: '1h' });
     
@@ -78,32 +70,6 @@ const login = async (req, res) => {
     }
 };
 
-<<<<<<< HEAD
-const signup = async (req, res) => {
-    try {
-      const { UserName,skills,intrests,role, email, password } = req.body;
-      // Hash the password
-      const hashedPassword = await bcrypt.hash(password, 10);
-  
-      // Insert user into the database
-      const sql = `INSERT INTO users (email,UserName, password, skills, role,intrests) VALUES ('${email}', '${UserName}', '${hashedPassword}','${skills}','${role}','${intrests}') `          
-      connection.execute(sql , (err,result)=>{
-        if(err) {
-            if(err.errno==1062){
-                return res.json("this is email is already exist");
-            }
-        }
-        return res.json("created successfully");
-       });
-  
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({
-        error: error.message
-      });
-    }
-  };
-=======
 
 const signup = async (req, res) => {
     try {
@@ -140,5 +106,4 @@ const signup = async (req, res) => {
 };
 
 
->>>>>>> 821882947a6686f7ce3658491a700ec0f0dc8bd4
 module.exports = { login, signup };

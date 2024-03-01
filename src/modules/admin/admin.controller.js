@@ -1,11 +1,4 @@
 const connection = require("../../../DB/connection.js");
-<<<<<<< HEAD
-
-const addCrafter = async function(req, res){
-    const {email,UserName,password,skills,intrests,role} = req.body ;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    try{     
-=======
 const bcrypt=require("bcrypt");
 const addCrafter = async function(req, res){
     const {email,UserName,password,skills,intrests,role} = req.body ;
@@ -14,7 +7,6 @@ const addCrafter = async function(req, res){
         if(req.user.role!='admin'){
             return res.json("you cannot access this page")
         }   
->>>>>>> 821882947a6686f7ce3658491a700ec0f0dc8bd4
    const sql = `INSERT INTO users (email,UserName, password, skills, role,intrests) VALUES ('${email}', '${UserName}', '${hashedPassword}','${skills}','${role}','${intrests}') `   
    connection.execute(sql,(err, result) => {
        if(err) {
@@ -47,10 +39,6 @@ const addCrafter = async function(req, res){
         res.json(err);
     }
    }
-<<<<<<< HEAD
-
-module.exports ={ addCrafter ,getCrafter} ;
-=======
    const deactivateUser = async function(request, response) {
     const { email } = request.body; // Assuming email is provided in the request params
     if(request.user.role!='admin'){
@@ -84,4 +72,3 @@ const featured = async function(req, res){
 
 }
 module.exports ={ addCrafter ,getCrafter,deactivateUser,featured} ;
->>>>>>> 821882947a6686f7ce3658491a700ec0f0dc8bd4
