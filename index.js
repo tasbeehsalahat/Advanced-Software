@@ -6,13 +6,14 @@ const project= require('./src/modules/project/project.js');
 const organizer=require('./src/modules/organizer/organizer.js')
 const users = require('./src/modules/users/user.js');
 const notfoundpage = require('./src/modules/notfoundpage/notfoundpage.js');
-
+const Collaborations=require('./src/modules/Collaborations/collab.js')
 app.use(express.json())
 app.use('/admin',admin)
 app.use('/auth',auth)
 app.use('/project',project)
 app.use('/organizer',organizer)
 app.use('/users',users)
+app.use('/auth',Collaborations)
 app.use('*', notfoundpage)
 
 app.listen(300,() => {
