@@ -1,5 +1,17 @@
+<<<<<<< HEAD
 const connection = require("../../../DB/connection.js");
 const jwt = require('jsonwebtoken');
+=======
+const express = require('express');
+const connection = require("../../../DB/connection.js");
+const jwt = require('jsonwebtoken');
+const bodyParser = require('body-parser');
+
+const app = express(); // Creating an instance of Express application
+
+app.use(bodyParser.json());
+
+>>>>>>> 821882947a6686f7ce3658491a700ec0f0dc8bd4
 const { JWT_SECRET_KEY } = require('./../middleware/middleware.js');
 const bcrypt = require('bcrypt');
 
@@ -18,6 +30,12 @@ const login = async (req, res) => {
             if (!user) {
                 return res.status(401).json({ message: 'Invalid email or password' });
             }
+<<<<<<< HEAD
+=======
+            if (user.status === 'deactivated') {
+                return res.status(403).json({ message: 'Account is deactivated' });
+              }
+>>>>>>> 821882947a6686f7ce3658491a700ec0f0dc8bd4
 
             const token = jwt.sign({ email: user.email, role: user.role }, JWT_SECRET_KEY, { expiresIn: '1h' });
     
@@ -60,6 +78,7 @@ const login = async (req, res) => {
     }
 };
 
+<<<<<<< HEAD
 const signup = async (req, res) => {
     try {
       const { UserName,skills,intrests,role, email, password } = req.body;
@@ -84,4 +103,42 @@ const signup = async (req, res) => {
       });
     }
   };
+=======
+
+const signup = async (req, res) => {
+    try {
+        const { UserName, skills, intrests, role, email, password } = req.body;
+
+        // Check if the email format is valid
+        if (!email || !email.includes('@') || !email.endsWith('.com')) {
+            return res.status(400).json({  message: 'Invalid email format' });
+        }
+        if (!password || !password.match(/^(?=.*[a-zA-Z])(?=.*[0-9])/)) {
+            return res.status(400).json({  message: 'Password must contain both letters and numbers' });
+        }
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Insert user into the database
+        const sql = `INSERT INTO users (email, UserName, password, skills, role, intrests) VALUES (?, ?, ?, ?, ?, ?)`;
+        connection.execute(sql, [email, UserName, hashedPassword, skills, role, intrests], (err, result) => {
+            if (err) {
+                if (err.errno == 1062) {
+                    return res.status(409).json("Email already exists");
+                } else {
+                    console.error(err);
+                    return res.status(500).json({ error: "Internal server error" });
+                }
+            }
+            return res.status(201).json("User created successfully");
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+
+>>>>>>> 821882947a6686f7ce3658491a700ec0f0dc8bd4
 module.exports = { login, signup };

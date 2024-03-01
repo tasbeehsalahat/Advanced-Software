@@ -1,9 +1,20 @@
 const connection = require("../../../DB/connection.js");
+<<<<<<< HEAD
 
 const addCrafter = async function(req, res){
     const {email,UserName,password,skills,intrests,role} = req.body ;
     const hashedPassword = await bcrypt.hash(password, 10);
     try{     
+=======
+const bcrypt=require("bcrypt");
+const addCrafter = async function(req, res){
+    const {email,UserName,password,skills,intrests,role} = req.body ;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    try{  
+        if(req.user.role!='admin'){
+            return res.json("you cannot access this page")
+        }   
+>>>>>>> 821882947a6686f7ce3658491a700ec0f0dc8bd4
    const sql = `INSERT INTO users (email,UserName, password, skills, role,intrests) VALUES ('${email}', '${UserName}', '${hashedPassword}','${skills}','${role}','${intrests}') `   
    connection.execute(sql,(err, result) => {
        if(err) {
@@ -36,5 +47,41 @@ const addCrafter = async function(req, res){
         res.json(err);
     }
    }
+<<<<<<< HEAD
 
 module.exports ={ addCrafter ,getCrafter} ;
+=======
+   const deactivateUser = async function(request, response) {
+    const { email } = request.body; // Assuming email is provided in the request params
+    if(request.user.role!='admin'){
+        return res.json("you cannot access this page")
+    }
+    const Sql = `SELECT * FROM users WHERE email = '${email}' AND status = 'active' `;
+    connection.execute(Sql, function(error, results) {
+        if (error) {
+            return response.status(500).json({ error: 'Error checking user status' });
+        }
+        if (results.length === 0) {
+            return response.status(404).json({ error: 'User not found or already deactivated' });
+        }
+        const userRole = results[0].role;
+
+        if (userRole === 'admin') {
+            return response.status(404).json({ error: 'You are an admin' });
+        }
+        const sql = `UPDATE users SET status = 'deactivated' WHERE email = '${email}'`;
+
+        connection.execute(sql, function(error, result) {
+            if (error) {
+                return response.status(500).json({ error: 'Unable to deactivate user' });
+            }
+            return response.json("User deactivated successfully");
+        });
+    });
+};
+const featured = async function(req, res){
+    const {pid}=req.body;
+
+}
+module.exports ={ addCrafter ,getCrafter,deactivateUser,featured} ;
+>>>>>>> 821882947a6686f7ce3658491a700ec0f0dc8bd4

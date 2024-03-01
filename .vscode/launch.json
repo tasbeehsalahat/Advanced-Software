@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "type": "chrome",
+            "name": "https://github.com/SewarAslan/CraftProj",
+            "request": "launch",
+            "url": "https://github.com/SewarAslan/CraftProj"
+        }
+    ]
+}
