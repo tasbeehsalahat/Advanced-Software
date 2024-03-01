@@ -39,24 +39,40 @@ const updateuser = async (request, response) => {
 
 const join = async (req, res) => {
     try{
-    const { user_email, project_title } = req.body;
+        const user_email = req.user.email;
+    const {project_title } = req.body;
     if(req.user.role !='crafter'){
         return response.json("you cannot access this page")
     }
-    const sql = 'INSERT INTO user_projects(user_email, project_title, status) VALUES (?, ?, ?)';
-    const params = [user_email, project_title, 'pending'];
+    
+    const sql2 = `SELECT NumofMem, size FROM project WHERE title="${project_title}"`;
+      
+    connection.execute(sql2, (err, result) => {
+      if (err) {
+        return res.json(err);
+      }
+  
+      if (result[0].size > result[0].NumofMem) {
 
-    connection.execute(sql, params, (error, result) => {
-        if (error) {
-           if (error.errno==1062){
-            return res.json({massege : "You already sent join request"})
-           }
-                return res.json( error) ;
- 
-        }
-
-        return res.status(201).json({ message: 'Join request sent successfully' });
-    });
+        const sql = 'INSERT INTO user_projects (user_email, project_title) VALUES (?, ?)';
+        const values = [user_email, project_title];
+    
+        connection.execute(sql,values, (error, result) => {
+            if (error) {
+               if (error.errno==1062){
+                return res.json({massege : "You already sent join request"})
+               }
+                    return res.json( error) ;
+     
+            }
+            const sql4= `update project set NumofMem=NumofMem+1 where title = "${project_title}"`
+            connection.execute(sql4);
+            return res.status(201).json({ message: 'Join request sent successfully' });
+        });
+      }
+    else
+      return res.json({ message: 'this project is full'})
+})
 }
 catch(err){
     const error =err.stack ;

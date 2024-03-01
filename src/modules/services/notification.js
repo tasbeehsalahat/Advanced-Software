@@ -33,18 +33,6 @@ const notification = async (req, res) => {
             if (err) {
                 return res.json(err); 
             }
-               
- if (status === 'accept' || status === 'reject') {
-                const updateStatus = (status === 'accept') ? 'accept' : 'reject';
-
-                
-                const sql2 = `UPDATE user_projects SET status=? WHERE user_email=?`;
-   connection.execute(sql2, [updateStatus, user_email], (erro, rlt) => {
-                    if (erro) return res.json({ error: erro });
-                    return res.json({ message: `${updateStatus.charAt(0).toUpperCase() + updateStatus.slice(1)}ed successfully` });
-                });
-            } 
-         
            else if (result.length === 0) {
                 return res.json({ notification: "No join request" });
             } else {
@@ -55,5 +43,26 @@ const notification = async (req, res) => {
         return res.json(err.stack);
     }
 };
+const chooseStatus = function(req,res){
+    try {
+        const { user_email, project_title,status } = req.body;
+            const sql3 = `UPDATE user_projects SET status='${status}' WHERE user_email="${user_email}"`;
+      
+            connection.execute(sql3, (erro, rlt) => {
+              if (erro) {
+                return res.json({ error: erro });
+              }
+              
+              // Return the response here to ensure it's the last response sent
+              return res.json({ message: `${status} successfully` });
+            });
+            const sql4= `update project set NumofMem=NumofMem+1 where title = ${project_title}`
+            connection.execute(sql4);
 
-module.exports = notification;
+      } catch (err) {
+        // Handle any synchronous errors here
+        return res.json(err.stack);
+      }
+      
+}
+module.exports = {notification,chooseStatus};

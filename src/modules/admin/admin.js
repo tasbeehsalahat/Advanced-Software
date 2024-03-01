@@ -2,7 +2,7 @@ const express = require('express');
 const connection = require('../../../DB/connection.js');
 const {addCrafter,getCrafter,deactivateUser,featured} = require('./admin.controller.js');
 const { authenticateJWT } = require('../middleware/middleware.js');
-const notification = require('../services/notification.js');
+const {notification,chooseStatus} = require('../services/notification.js');
 const { updateuser } = require('../users/user.controller.js');
 const app = express();
 
@@ -12,6 +12,6 @@ app.patch('/:email',authenticateJWT,updateuser); //update user
 app.put('/status',authenticateJWT,deactivateUser);
 app.get('/notification',authenticateJWT,notification);
 app.get('/featured projects.',authenticateJWT,featured);
-
+app.post('/chooseStatus',chooseStatus)
 module.exports= app ;
 ////////////////////////////////
