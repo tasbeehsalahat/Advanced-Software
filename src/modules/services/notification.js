@@ -9,10 +9,9 @@ const notification = async (req, res) => {
         const { user_email, status } = req.body;
 
         let sql;
-        let params = []; // Array to hold query parameters
+        let params = [];
 
         if (req.user.role === 'organizer') {
-            // For organizer, construct a parameterized query
             sql = `SELECT up.*
                 FROM user_projects up
                 JOIN project p ON up.project_title = p.title
@@ -27,7 +26,7 @@ const notification = async (req, res) => {
             params = [req.user.email, req.user.email, req.user.email];
         } 
         else {
-            sql = `SELECT * FROM user_projects WHERE status='pending'`;
+            sql = `SELECT * FROM user_projects WHERE status='pending'` 
         }
 
         connection.execute(sql, params, (err, result) => {

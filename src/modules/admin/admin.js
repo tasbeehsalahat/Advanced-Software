@@ -8,7 +8,7 @@ const app = express();
 
 app.post('/crafter',authenticateJWT,addCrafter);
 app.get('/crafters',authenticateJWT,getCrafter);//view users 
-app.put('/userinfo',authenticateJWT,updateuser); //update user 
+app.patch('/:email',authenticateJWT,updateuser); //update user 
 app.put('/status',authenticateJWT,deactivateUser);
 app.get('/notification',authenticateJWT,notification);
 app.get('/featured projects.',authenticateJWT,featured);

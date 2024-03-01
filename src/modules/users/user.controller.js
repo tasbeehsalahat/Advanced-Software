@@ -1,26 +1,64 @@
 const connection = require('./../../../DB/connection.js');
 const bcrypt = require('bcrypt');
 
-const updateuser = async (request, response) =>{
-    const { UserName, skills, intrests,password, email } = request.body;
-    const hashpass= await bcrypt.hash(password,10);
-    if(request.user.role='organizer'){
-        return response.json("you cannot access this page")
-    }
-    else{
-    const sql = `UPDATE users 
-                 SET UserName='${UserName}', skills='${skills}', intrests='${intrests}', password='${hashpass}'
-                 WHERE email='${email}'`;
-                 
-    connection.execute(sql, function(error, result) {
-        if (error) {
-            return response.json(error);
+const updateuser = async (request, response) => {
+    const { UserName, skills, intrests, password, email } = request.body;
+    const userEmail = request.params.email; // Correctly access email from request parameters
+
+    if (request.user.role === 'organizer') {
+        return response.json("You cannot access this page");
+    } 
+    else if (request.user.role === 'admin') {
+        if(request.body.length!=0){
+            const updateFields = Object.keys(request.body).map(key => `${key} = ${request.body[key]}`).join(', ');
+            const updateQuery = `UPDATE users SET ${updateFields} WHERE email = "${request.body.email}"`;
+            
+            const values = [...Object.values(request.body),userEmail ];
+            
+            connection.execute(updateQuery, values, (error, results) => {
+              if (error) {
+                return response.json(error)
+              }
+            return response.json("updated succesfully")
+            
+            })
         }
-        return response.json("updated successfully");
-    });
- 
+        const sql = `SELECT * FROM users WHERE email="${userEmail}"`; 
+        connection.execute(sql, function (error, result) {
+       
+        if (error) {
+                        return response.json(error);
+                    }
+                    return response.json(result); 
+                });
+            
+            } 
+        else if (request.user.role === 'crafter') {
+        const sql = `SELECT * FROM users WHERE email="${userEmail}"`;
+        connection.execute(sql, function (error, result) {
+            if (error) {
+                return response.json(error);
+            }
+            if (result.length > 0) {
+                // Crafter's own information found, attempt to update
+                const updateSql = `UPDATE users 
+                    SET UserName='${UserName}', skills='${skills}', intrests='${intrests}', password='${password}'
+                    WHERE email='${email}'`;
+                connection.execute(updateSql, function (error, result) {
+                    if (error) {
+                        return response.json(error);
+                    }
+                    return response.json("Updated successfully");
+                });
+            } else {
+                return response.json("Crafter information not found");
+            }
+        });
+    } else {
+        return response.json("Unknown role");
     }
 };
+
 
 const join = async (req, res) => {
     try{
@@ -129,10 +167,7 @@ const informations=async function (req,res){
 else {
    return res.json({result});
 }
-
-
-
-    })
+  })
 
 }
 module.exports = {updateuser,join,shownotification,match,informations} ;
