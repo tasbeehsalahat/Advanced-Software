@@ -2,8 +2,7 @@ const express = require('express');
 const connection = require("../../../DB/connection.js");
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
-const app = express(); // Creating an instance of Express application
-
+const app = express(); 
 app.use(bodyParser.json());
 
 const { JWT_SECRET_KEY } = require('./../middleware/middleware.js');

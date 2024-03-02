@@ -46,7 +46,7 @@ const addCrafter = async function(req, res){
     }
    }
    const deactivateUser = async function(request, response) {
-    const { email } = request.body; // Assuming email is provided in the request params
+    const { email } = request.body; 
     if(request.user.role!='admin'){
         return res.json("you cannot access this page")
     }
