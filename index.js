@@ -13,9 +13,8 @@ app.use('/auth',auth)
 app.use('/project',project)
 app.use('/organizer',organizer)
 app.use('/users',users)
-app.use('/auth',Collaborations)
+app.use('/collaborations',Collaborations)
 app.use('*', notfoundpage)
-
-app.listen(300,() => {
+app.listen(3000,() => {
     console.log('listening on 3000');
 });
