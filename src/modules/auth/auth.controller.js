@@ -2,7 +2,6 @@ const express = require('express');
 const connection = require("../../../DB/connection.js");
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
-
 const app = express(); // Creating an instance of Express application
 
 app.use(bodyParser.json());
@@ -43,11 +42,9 @@ const login = async (req, res) => {
                         if (err) {
                             return res.json({ message: "Error" });
                         }
-                        // Handle update success
                         return res.json({ message: 'Welcome back', token });
                     });
                 } else {
-                    // Handle insert into tokens table
                     switch (user.role) {
                         case 'admin':
                         case 'crafter':
@@ -105,5 +102,24 @@ const signup = async (req, res) => {
     }
 };
 
+const logout = async (req, res) => {
+    try {
+        const token = req.header('Authorization');
 
-module.exports = { login, signup };
+        if (!token) {
+            return res.status(400).json({ message: 'No token provided' });
+        }
+
+        // Invalidate the token by adding it to a blacklist
+        const BLACKLISTED_TOKENS = []; // Assuming you have a blacklist array
+
+        BLACKLISTED_TOKENS.push(token);
+console.log("jfh")
+        res.status(200).json({ message: 'Logout successful' });
+    } catch (err) {
+        res.status(500).json({ error: 'An error occurred while logging out' });
+    }
+};
+
+
+module.exports = { login, signup,logout };
