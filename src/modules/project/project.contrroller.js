@@ -20,15 +20,14 @@ const addproject = async function (req, res) {
         } else if (err) {
             return res.json({ error: err });
         }
-
-        // File uploaded successfully
         const { title, description, level, materials, size, comments, organizer_email, skills } = req.body;
         const image = req.file ? req.file.filename : null; 
         if (req.user.role === 'crafter') {
             return res.json("You cannot access this page");
         }
 
-        const sql = `INSERT INTO project (title, description, level, materials, size, comments, organizer_email, skills, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+        const sql = `INSERT INTO project (title, description, level, materials, size, comments, organizer_email, skills, image_url) VALUES ("${title}",
+        "${description}", "${level}", "${materials}", "${size}", "${comments}","${organizer_email}","${skills}", "${image}")`;
         connection.execute(sql, [title, description, level, materials, size, comments, organizer_email, skills, image], (err, result) => {
             if (err) {
                 if (err.errno == 1452) {
@@ -87,8 +86,8 @@ const deleteproject =  function(req, res){
 }
 const getproject = function(req, res) {
   try {
-      const sql = 'SELECT title, description, level, materials, size, comments, organizer_email, skills, CONCAT("http://", ?, "/upload/", image) AS image_url FROM project';
-      const host = req.headers.host;
+    const sql = 'SELECT title, description, level, materials, size, comments, organizer_email, skills, CONCAT("http://", ?, "/upload/images/", image_url) AS image_url FROM project';
+    const host = req.headers.host;
 
       connection.execute(sql, [host], (err, result) => {
           if (err) {

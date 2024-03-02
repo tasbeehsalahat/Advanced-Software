@@ -114,7 +114,7 @@ const logout = async (req, res) => {
       });
   
      return res.json( {
-        "message": "Logout successful\nSee you soon!"
+        "message": "Logout successful...See you soon!"
     })
     } catch (err) {
       console.error(err);
