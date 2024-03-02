@@ -82,7 +82,6 @@ const signup = async (req, res) => {
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Insert user into the database
         const sql = `INSERT INTO users (email, UserName, password, skills, role, intrests) VALUES (?, ?, ?, ?, ?, ?)`;
         connection.execute(sql, [email, UserName, hashedPassword, skills, role, intrests], (err, result) => {
             if (err) {
@@ -101,25 +100,27 @@ const signup = async (req, res) => {
         return res.status(500).json({ error: "Internal server error" });
     }
 };
-
 const logout = async (req, res) => {
     try {
-        const token = req.header('Authorization');
-
-        if (!token) {
-            return res.status(400).json({ message: 'No token provided' });
+      const token = req.header('Authorization'); 
+  console.log(token)
+      const sql = `DELETE FROM tokens WHERE token = "${token}"`;
+      connection.execute(sql, [token], (error, results, fields) => {
+        if (error) {
+          console.error(error);
+          return res.status(500).json({ error: 'An error occurred while logging out' });
         }
-
-        // Invalidate the token by adding it to a blacklist
-        const BLACKLISTED_TOKENS = []; // Assuming you have a blacklist array
-
-        BLACKLISTED_TOKENS.push(token);
-console.log("jfh")
-        res.status(200).json({ message: 'Logout successful' });
+        console.log('Token removed from the database');
+      });
+  
+     return res.json( {
+        "message": "Logout successful\nSee you soon!"
+    })
     } catch (err) {
-        res.status(500).json({ error: 'An error occurred while logging out' });
+      console.error(err);
+      res.status(500).json(err.stack );
     }
-};
+  };
+  
 
-
-module.exports = { login, signup,logout };
+module.exports = { login, signup,logout};
