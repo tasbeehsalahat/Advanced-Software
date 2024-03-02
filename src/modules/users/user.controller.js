@@ -170,7 +170,7 @@ else {
   })
 
 }
-const LendMaterial = async (req, res) => {
+const Lendcenter = async (req, res) => {
     if (req.user.role !== 'crafter') {
         return res.json("You cannot access this page");
     }
@@ -206,4 +206,51 @@ const LendMaterial = async (req, res) => {
         }
     });
 };
-module.exports = {updateuser,join,shownotification,match,informations,LendMaterials} ;
+const LendMaterial = async (req, res) => {
+    if (req.user.role !== 'crafter') {
+        return res.json("You cannot access this page");
+    }
+
+    const email = req.user.email;
+
+    const sql1 = `SELECT project_title FROM collabration WHERE user_email="${email}"`;
+
+    connection.execute(sql1, (err, projects) => {
+        if (err) {
+            console.error("Error fetching projects:", err);
+            return res.status(500).json("Internal server error");
+        }
+        const projectTitles = projects.map(row => row.project_title);
+
+        const materialsPromises = projectTitles.map(project_title => {
+            const sql2 = `SELECT * FROM material WHERE project_title="${project_title}"`;
+            return new Promise((resolve, reject) => {
+                connection.execute(sql2, (err, materials) => {
+                    if (err) {
+                        console.error(`Error fetching materials for project ${project_title}:`, err);
+                        reject(err);
+                    } else {
+                        resolve(materials);
+                    }
+                });
+            });
+        });
+
+        // Resolve all promises
+        Promise.all(materialsPromises)
+            .then(materials => {
+                // Combine materials from all projects into a single array
+                const allMaterials = [].concat(...materials);
+                res.json(allMaterials);
+            })
+            .catch(err => {
+                console.error("Error fetching materials:", err);
+                res.status(500).json("Internal server error");
+            });
+    });
+};
+
+
+
+
+module.exports = {updateuser,join,shownotification,match,informations,LendMaterial,Lendcenter} ;
