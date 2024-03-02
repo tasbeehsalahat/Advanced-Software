@@ -8,6 +8,8 @@ const users = require('./src/modules/users/user.js');
 const email = require('./src/modules/email/email.js');
 const password = require('./src/modules/services/password/password.js');
 const notfoundpage = require('./src/modules/notfoundpage/notfoundpage.js');
+const Collaborations=require('./src/modules/Collaborations/collab.js')
+const Home=require('./src/modules/HomePage/home.js')
 app.use(express.json())
 app.use('/admin',admin)
 app.use('/auth',auth)
@@ -18,8 +20,9 @@ app.use('/email',email)
 app.use('/password',password)
 app.use('/upload', express.static('upload'));
 app.use('*', notfoundpage)
-
-
+app.use('/collaborations',Collaborations)
+app.use('/Home',Home)
+app.use('*', notfoundpage)
 app.listen(3000,() => {
     console.log('listening on 3000');
 });

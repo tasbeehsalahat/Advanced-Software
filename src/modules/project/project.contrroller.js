@@ -1,4 +1,5 @@
 const connection = require("../../../DB/connection.js");
+
 const addproject = async function(req, res){
     const {title, description, level, materials, size, comments, crafter_email, skills} = await req.body;
     try{     
@@ -57,6 +58,52 @@ const updateproject = async function(req, res){
         return res.json("Updated successfully");
     });
 }
+const changeProjStatus = async function(req, res) {
+    const title = req.body.title;
+    let newStatus = '';
+
+    if(req.user.role === 'crafter' || req.user.role === 'admin') {
+        return res.json("You cannot access this page");
+    }
+
+    const sqlQuery = 'SELECT process_flow FROM project WHERE title = ? AND organizer_email = ?';
+
+    connection.query(sqlQuery, [title, req.user.email], (error, results) => {
+        if (error) {
+            console.error('Error executing SQL query:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+
+        if (results.length > 0) {
+            newStatus = results[0].process_flow;
+            console.log(newStatus)
+            let sql = '';
+
+            if(newStatus === 'created') {
+                sql = `UPDATE project SET process_flow='started' WHERE title='${title}'`;
+            } else if(newStatus === 'started') {
+                sql = `UPDATE project SET process_flow='finished' WHERE title='${title}'`;
+            } else if(newStatus === 'finished') {
+                return res.json({ message: "This project is already finished" });
+            }
+
+            if(sql) { // Check if sql query is not empty
+                connection.query(sql, (error, result) => {
+                    if (error) {
+                        console.error('Error updating project status:', error);
+                        return res.status(500).json({ error: 'Internal Server Error' });
+                    }
+                    return res.json("Updated successfully");
+                });
+            } else {
+                return res.json({ message: "No valid action found" });
+            }
+        } else {
+            return res.json({ message: 'No project found with the given title and organizer email' });
+        }
+    });
+};
+
 
 const getproject = async function(req, res){
     const {title, description, level, materials, size, comments, crafter_email, skills} = await req.body;
@@ -78,4 +125,4 @@ const getproject = async function(req, res){
        return res.json(err);
   }
 }
-module.exports = {addproject, deleteproject,updateproject,getproject };
+module.exports = {addproject, deleteproject,updateproject,getproject ,changeProjStatus};
