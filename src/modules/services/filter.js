@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 const filter = async function(req, res) {
     const { skills, materials, size ,level} = req.query;
 
-    let sql = 'SELECT * FROM project WHERE 1=1'; 
+    let sql = 'SELECT * FROM project'; 
     const params = []; 
 
     if (skills) {
