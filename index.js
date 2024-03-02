@@ -13,8 +13,11 @@ app.use('/auth',auth)
 app.use('/project',project)
 app.use('/organizer',organizer)
 app.use('/users',users)
+app.use('/upload', express.static('upload'));
+
 app.use('*', notfoundpage)
-//
+
+
 app.listen(3000,() => {
     console.log('listening on 3000');
 });

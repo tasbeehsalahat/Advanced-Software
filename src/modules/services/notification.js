@@ -23,7 +23,7 @@ const notification = async (req, res) => {
 
        await connection.execute(sql, params,(err, result) => {
             if (err) {
-                return res.json(err); 
+                return res.json(err);
             }
            else if (result.length === 0) {
                 return res.json({ notification: "No join request" });
@@ -37,6 +37,9 @@ const notification = async (req, res) => {
 };
 const chooseStatus =async function(req,res){
     try {
+        if (req.user.role === 'crafter') {
+            return res.json("You cannot access this page");
+        }
         const { user_email, project_title,status } = req.body;
             const sql3 = `UPDATE collaboration SET status='${status}' WHERE user_email="${user_email}"`;
       

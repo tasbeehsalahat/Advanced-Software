@@ -12,6 +12,6 @@ app.patch('/:email',authenticateJWT,updateuser); //update user
 app.put('/status',authenticateJWT,deactivateUser);
 app.get('/notification',authenticateJWT,notification);
 app.get('/featured projects.',authenticateJWT,featured);
-app.post('/chooseStatus',chooseStatus)
+app.post('/chooseStatus',authenticateJWT,chooseStatus)
 module.exports= app ;
 ////////////////////////////////
