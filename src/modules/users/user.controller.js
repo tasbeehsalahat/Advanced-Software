@@ -54,19 +54,16 @@ const join = async (req, res) => {
   
       if (result[0].size > result[0].NumofMem) {
 
-        const sql = 'INSERT INTO user_projects (user_email, project_title) VALUES (?, ?)';
+        const sql = 'INSERT INTO collaboration (user_email, project_title) VALUES (?, ?)';
         const values = [user_email, project_title];
     
-        connection.execute(sql,values, (error, result) => {
+        connection.execute(sql,values, (error, resultt) => {
             if (error) {
                if (error.errno==1062){
                 return res.json({massege : "You already sent join request"})
                }
                     return res.json( error) ;
-     
             }
-            const sql4= `update project set NumofMem=NumofMem+1 where title = "${project_title}"`
-            connection.execute(sql4);
             return res.status(201).json({ message: 'Join request sent successfully' });
         });
       }
