@@ -1,19 +1,44 @@
 const connection = require("../../../DB/connection.js");
-
-const addproject = async function(req, res){
-    const {title, description, level, materials, size, comments, crafter_email, skills} = await req.body;
-    try{     
-   const sql = `INSERT INTO project (title,description,level,materials,size,comments,crafter_email,skills) VALUES ('${title}', '${description}', '${level}','${materials}','${size}','${comments}','${crafter_email}','${skills}') `   
-   connection.execute(sql,(err, result) => {
-    if(err){
-       if(err.errno==1452) {
-         
-               return res.json("this email isn't exsist");
-        
-       }
-       else return res.json(err);
+const multer = require("multer");
+const path = require("path");
+const express = require('express');
+const storage = multer.diskStorage({
+    destination: './upload/images',
+    filename: (req, file, cb) => {
+        cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
     }
-       return res.json("You create a project successfully");
+});
+
+const upload = multer({
+    storage: storage
+}).single('image');
+
+const addproject = async function (req, res) {
+    try {
+    upload(req, res, function (err) {
+        if (err instanceof multer.MulterError) {
+            return res.json({ error: err.message });
+        } else if (err) {
+            return res.json({ error: err });
+        }
+        const { title, description, level, materials, size, comments, organizer_email, skills } = req.body;
+        const image = req.file ? req.file.filename : null; 
+        if (req.user.role === 'crafter') {
+            return res.json("You cannot access this page");
+        }
+
+        const sql = `INSERT INTO project (title, description, level, materials, size, comments, organizer_email, skills, image_url) VALUES ("${title}",
+        "${description}", "${level}", "${materials}", "${size}", "${comments}","${organizer_email}","${skills}", "${image}")`;
+        connection.execute(sql, [title, description, level, materials, size, comments, organizer_email, skills, image], (err, result) => {
+            if (err) {
+                if (err.errno == 1452) {
+                    return res.json({ message: "This email doesn't exist" });
+                } else {
+                    return res.json(err.stack);
+                }
+            }
+            return res.json({ message: "You created a project successfully" });
+        });
     });
    }
    catch(err){
@@ -58,6 +83,7 @@ const updateproject = async function(req, res){
         return res.json("Updated successfully");
     });
 }
+
 const changeProjStatus = async function(req, res) {
     const title = req.body.title;
     let newStatus = '';
@@ -104,25 +130,20 @@ const changeProjStatus = async function(req, res) {
     });
 };
 
-
-const getproject = async function(req, res){
-    const {title, description, level, materials, size, comments, crafter_email, skills} = await req.body;
-    try{     
-   const sql = `INSERT INTO project (title,description,level,materials,size,comments,crafter_email,skills) VALUES ('${title}', '${description}', '${level}','${materials}','${size}','${comments}','${crafter_email}','${skills}') `   
-   connection.execute(sql,(err, result) => {
-    if(err){
-       if(err.errno==1452) {
-         
-               return res.json("this email isn't exsist");
-        
-       }
-       else return res.json(err);
+const getproject = function(req, res) {
+    try {
+      const sql = 'SELECT title, description, level, materials, size, comments, organizer_email, skills, CONCAT("http://", ?, "/upload/images/", image_url) AS image_url FROM project';
+      const host = req.headers.host;
+  
+        connection.execute(sql, [host], (err, result) => {
+            if (err) {
+                return res.json(err);
+            }
+  
+            return res.json({ projects: result });
+        });
+    } catch (err) {
+        return res.json(err);
     }
-       return res.json("You create a project successfully");
-    });
-   }
-   catch(err){
-       return res.json(err);
-  }
-}
+  };
 module.exports = {addproject, deleteproject,updateproject,getproject ,changeProjStatus};

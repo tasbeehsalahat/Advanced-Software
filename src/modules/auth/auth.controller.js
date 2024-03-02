@@ -2,7 +2,6 @@ const express = require('express');
 const connection = require("../../../DB/connection.js");
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
-
 const app = express(); // Creating an instance of Express application
 
 app.use(bodyParser.json());
@@ -43,11 +42,9 @@ const login = async (req, res) => {
                         if (err) {
                             return res.json({ message: "Error" });
                         }
-                        // Handle update success
                         return res.json({ message: 'Welcome back', token });
                     });
                 } else {
-                    // Handle insert into tokens table
                     switch (user.role) {
                         case 'admin':
                         case 'crafter':
@@ -85,7 +82,6 @@ const signup = async (req, res) => {
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Insert user into the database
         const sql = `INSERT INTO users (email, UserName, password, skills, role, intrests) VALUES (?, ?, ?, ?, ?, ?)`;
         connection.execute(sql, [email, UserName, hashedPassword, skills, role, intrests], (err, result) => {
             if (err) {
@@ -104,6 +100,27 @@ const signup = async (req, res) => {
         return res.status(500).json({ error: "Internal server error" });
     }
 };
+const logout = async (req, res) => {
+    try {
+      const token = req.header('Authorization'); 
+  console.log(token)
+      const sql = `DELETE FROM tokens WHERE token = "${token}"`;
+      connection.execute(sql, [token], (error, results, fields) => {
+        if (error) {
+          console.error(error);
+          return res.status(500).json({ error: 'An error occurred while logging out' });
+        }
+        console.log('Token removed from the database');
+      });
+  
+     return res.json( {
+        "message": "Logout successful...See you soon!"
+    })
+    } catch (err) {
+      console.error(err);
+      res.status(500).json(err.stack );
+    }
+  };
+  
 
-
-module.exports = { login, signup };
+module.exports = { login, signup,logout};
