@@ -9,6 +9,7 @@ router.get('/show',authenticateJWT,shownotification);
 router.get('/filter',filter);
 router.get('/matchingcrafter',authenticateJWT,match);
 router.get('/crafters/:useremail',informations);
+router.get('/LendMaterials',LendMaterials);
 
 module.exports = router;
 
