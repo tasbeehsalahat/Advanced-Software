@@ -1,4 +1,4 @@
-const { updateuser , join ,shownotification,match,informations} = require('./user.controller.js');
+const { updateuser , join ,shownotification,match,informations, LendMaterial,Lendcenter} = require('./user.controller.js');
 const router = require('express').Router();
 const { authenticateJWT } = require('../middleware/middleware.js');
 const { filter } = require('../services/filter.js');
@@ -9,7 +9,7 @@ router.get('/show',authenticateJWT,shownotification);
 router.get('/filter',filter);
 router.get('/matchingcrafter',authenticateJWT,match);
 router.get('/crafters/:useremail',informations);
-router.get('/LendMaterials',LendMaterials);
-
+router.post('/lendcenter',authenticateJWT,Lendcenter);///
+router.get('/lendMaterial',authenticateJWT,LendMaterial)
 module.exports = router;
 
