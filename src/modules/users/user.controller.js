@@ -170,4 +170,40 @@ else {
   })
 
 }
-module.exports = {updateuser,join,shownotification,match,informations} ;
+const LendMaterial = async (req, res) => {
+    if (req.user.role !== 'crafter') {
+        return res.json("You cannot access this page");
+    }
+    
+    const { Material, Quantity, title } = req.body;
+    const email = req.user.email;
+
+    const sql = `SELECT project_title FROM collaboration WHERE user_email='${email}'`;
+
+    connection.execute(sql, (err, result) => {
+        if (err) {
+            return res.json(err.stack);
+        }
+
+        if (result.length > 0) {
+            const joinedProjects = result.map(entry => entry.project_title);
+            
+            if (joinedProjects.includes(title)) {
+                const sql2 = `INSERT INTO material (NameOfMaterial, Crafte_email, project_title, Quantity)
+                              VALUES ('${Material}', '${email}', '${title}', '${Quantity}')`;
+
+                connection.execute(sql2, (err, result) => {
+                    if (err) {
+                        return res.json(err.stack);
+                    }
+                    return res.json({ message: "Material added successfully" });
+                });
+            } else {
+                return res.json({ message: "You haven't joined this project" });
+            }
+        } else {
+            return res.json({ message: "You haven't joined any projects" });
+        }
+    });
+};
+module.exports = {updateuser,join,shownotification,match,informations,LendMaterials} ;
