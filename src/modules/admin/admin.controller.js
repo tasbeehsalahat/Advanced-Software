@@ -73,8 +73,5 @@ const addCrafter = async function(req, res){
         });
     });
 };
-const featured = async function(req, res){
-    const {pid}=req.body;
 
-}
 module.exports ={ addCrafter ,getCrafter,deactivateUser,featured} ;
