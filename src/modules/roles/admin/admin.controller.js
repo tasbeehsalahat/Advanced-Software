@@ -73,5 +73,29 @@ const addCrafter = async function(req, res){
         });
     });
 };
+const selectfeatured=function(req,res){
+    if(req.user.role!='admin'){
+        return res.json("you cannot access this page")
+    }
+const title=req.body
+const sql = `SELECT process_flow from project where title="${title}"`;
+connection.execute(sql,(err,result)=>{
+    if(err){
+        return res.json(err)
+    }
+    if(result[0]!="finished"){
+        return res.status(400).json({massege :'This project doesnt finish yet'})
+    }
+  else{
+    const sql2=`UPDATE project SET featured='yes'`;
+    connection.execute(sql2,(error,res)=>{
+       if (error){
+        return res.json(error.stack)
+       }
+       return res.json({message:'You have successfully marked this project '})
+    })
+  }
+})
 
-module.exports ={ addCrafter ,getCrafter,deactivateUser} ;
+}
+module.exports ={ addCrafter ,getCrafter,deactivateUser,selectfeatured} ;

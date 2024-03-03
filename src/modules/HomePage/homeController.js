@@ -1,4 +1,4 @@
-const connection = require('../../../../DB/connection');
+const connection1= require('../../../DB/connection.js');
 
 const { connection } = require('mongoose');
 const request = require('request');
@@ -85,8 +85,8 @@ function getItem(req, res) {
   });
 }
 const finishedproject = async (req,res)=>{
-const sql =`select title,description,CONCAT("http://", ?, "/upload/images/", image_url) AS image_url FROM project where process_flow="finished"`;
-connection.excute(sql,(err,result)=>{
+const sql =`select organizer_email,title,description,CONCAT("http://", ?, "/upload/images/", image_url) AS image_url FROM project where process_flow="finished"`;
+connection1.excute(sql,(err,result)=>{
 if(err){
  return  res.json(err)
 }
@@ -94,14 +94,31 @@ return res.json(result)
 });
 
 }
+const featuredproject=async (req,res)=>{
+  const sql =`select organizer_email,title,description,CONCAT("http://", ?, "/upload/images/", image_url) AS image_url FROM project where featured="yes"`;
+  connection.excute(sql,(err,result)=>{
+    if(err){
+     return  res.json(err)
+    }
+    return res.json(result)
+    });
+}
+
+const joinevent =async(req,res)=>{
+  if(req.user.role !='organizer'){
+    return res.json("You can't access this page")
+  }
+  const title=req.body
+const sql =`select process_flow from project where title="${title}"`
+connection1.excute(sql,(error,result)=>{
+if (result[0]!='finished'){
+  return res.json({message:"You can't join the event because you'r project doesn't finished yet!"})
+}
+else{
+const sql2=`INSERT INTO events `
+}
+})
+}
 
 
-
-
-
-module.exports = {
-  searchByTerm,
-  getItem,
-  chatGPT,finishedproject
-
-};
+module.exports = {searchByTerm,getItem,chatGPT,finishedproject,featuredproject,joinevent};

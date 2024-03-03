@@ -1,4 +1,4 @@
-const connection = require('./../../../DB/connection.js');
+const connection = require('../../../../DB/connection');
 const bcrypt = require('bcrypt');
 
 const updateuser = async (request, response) => {

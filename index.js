@@ -1,11 +1,10 @@
 const express = require('express');
 const app = express();
-
 const admin = require('./src/modules/roles/admin/admin.js');
 const auth = require('./src/modules/auth/auth.js');
 const project= require('./src/modules/project/project.js');
-const organizer=require('./src/modules/organizer/organizer.js')
-const users = require('./src/modules/users/user.js');
+const organizer=require('./src/modules/roles/organizer/organizer.js')
+const users = require('./src/modules/roles/users/user.js');
 const email = require('./src/modules/services/email/email.js');
 const password = require('./src/modules/services/password/password.js');
 const notfoundpage = require('./src/modules/notfoundpage/notfoundpage.js');
