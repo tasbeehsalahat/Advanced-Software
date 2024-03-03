@@ -72,7 +72,6 @@ const signup = async (req, res) => {
     try {
         const { UserName, skills, intrests, role, email, password } = req.body;
 
-        // Check if the email format is valid
         if (!email || !email.includes('@') || !email.endsWith('.com')) {
             return res.status(400).json({  message: 'Invalid email format' });
         }

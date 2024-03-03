@@ -6,7 +6,7 @@ const {getItem,searchByTerm,chatGPT,finishedproject,featuredproject, joinevent} 
 router.post('/search',authenticateJWT,searchByTerm);
 router.post('/chatGPT',authenticateJWT,chatGPT);
 router.get('/getItem',authenticateJWT, getItem);
-router.get('/finshedproject',finishedproject);
+router.get('/finishedproject',finishedproject);
 router.post('/featuredproject',authenticateJWT,featuredproject);
 router.post('/event',authenticateJWT,joinevent)
 module.exports = router;
