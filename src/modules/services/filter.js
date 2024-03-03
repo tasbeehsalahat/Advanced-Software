@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 const filter = async function(req, res) {
     const { skills, materials, size ,level} = req.query;
 
-    let sql = 'SELECT * FROM project WHERE 1=1'; 
+    let sql = 'SELECT * FROM project'; 
     const params = []; 
 
     if (skills) {
@@ -14,7 +14,7 @@ const filter = async function(req, res) {
         sql += ` AND (`;
         sql += skillList.map(() => `FIND_IN_SET(?, skills)`).join(' OR '); 
         sql += `)`;
-        params.push(...skillList); 
+        params.push(...skillList); // Add each skill to parameters array
         console.log('Received skills:', skillList);
         console.log(placeholders);
     }
@@ -37,17 +37,19 @@ const filter = async function(req, res) {
         params.push(level); 
     }
 
+    // Execute the SQL query with parameters
     connection.execute(sql, params, function(error, results) {
         if (error) {
             return res.status(500).json({ error: 'Internal server error' });
         }
 
+        // Check if no projects match the filter criteria
         if (results.length === 0) {
             console.log('No projects found matching the filter criteria');
             return res.status(404).json({ message: 'No projects found matching the filter criteria' });
         }
 
-        return res.json(results); 
+        return res.json(results); // Return filtered projects
     });
 };
 module.exports={filter}
