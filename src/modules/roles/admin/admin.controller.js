@@ -1,4 +1,4 @@
-const connection = require("../../../DB/connection.js");
+const connection = require("../../../../DB/connection.js");
 const bcrypt=require("bcrypt");
 const addCrafter = async function(req, res){
     const {email,UserName,password,skills,intrests,role} = req.body ;
@@ -73,8 +73,5 @@ const addCrafter = async function(req, res){
         });
     });
 };
-const featured = async function(req, res){
-    const {pid}=req.body;
 
-}
-module.exports ={ addCrafter ,getCrafter,deactivateUser,featured} ;
+module.exports ={ addCrafter ,getCrafter,deactivateUser} ;

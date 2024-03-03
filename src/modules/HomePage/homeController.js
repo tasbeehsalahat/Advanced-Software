@@ -1,4 +1,4 @@
-const connection = require('./../../../DB/connection');
+const connection = require('../../../../DB/connection');
 
 const { connection } = require('mongoose');
 const request = require('request');
@@ -85,8 +85,13 @@ function getItem(req, res) {
   });
 }
 const finishedproject = async (req,res)=>{
-const sql =`select title,description,image_url from project where process_flow="finished"`;
-connection.excute(sql);
+const sql =`select title,description,CONCAT("http://", ?, "/upload/images/", image_url) AS image_url FROM project where process_flow="finished"`;
+connection.excute(sql,(err,result)=>{
+if(err){
+ return  res.json(err)
+}
+return res.json(result)
+});
 
 }
 

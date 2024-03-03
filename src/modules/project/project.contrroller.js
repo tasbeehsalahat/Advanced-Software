@@ -47,20 +47,18 @@ const addproject = async function (req, res) {
 }
 
 const deleteproject = async function(req, res){
-    const {title, description, level, materials, size, comments, crafter_email, skills} = await req.body;
+    const {title} = await req.body;
     try{     
-        const sql = `DELETE * FROM project WHERE project_id = '${projectId}'`;
+        const sql = `DELETE * FROM project WHERE title= '${title}'`;
 
         // Execute the SQL query
         connection.execute(sql, (err, result) => {
             if (err) {
                 return res.json(err); // If an error occurs during deletion
             }
-            // If no error, check if any rows were affected
             if (result.affectedRows === 0) {
-                return res.json("No project found with the provided ID"); // If no project found with provided ID
+                return res.json("No project found with the provided title"); // If no project found with provided ID
             }
-            // If successful deletion
             return res.json("Project deleted successfully");
         });
     } catch (err) {
