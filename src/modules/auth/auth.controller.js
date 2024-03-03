@@ -30,7 +30,7 @@ const login = async (req, res) => {
 
             const token = jwt.sign({ email: user.email, role: user.role }, JWT_SECRET_KEY, { expiresIn: '1h' });
     
-            const sql2 = `SELECT email_user FROM tokens WHERE email_user = ?`;
+            const sql2 = `SELECT email_user FROM tokens WHERE email_user = "${email}"`;
             connection.execute(sql2, [email], (err, results) => {
                 console.log(results);
                 if (err) {

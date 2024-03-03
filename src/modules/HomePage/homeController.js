@@ -1,6 +1,5 @@
 const connection1= require('../../../DB/connection.js');
 
-const { connection } = require('mongoose');
 const request = require('request');
 
 function searchByTerm(req, res) {
@@ -85,8 +84,8 @@ function getItem(req, res) {
   });
 }
 const finishedproject = async (req,res)=>{
-const sql =`select organizer_email,title,description,CONCAT("http://", ?, "/upload/images/", image_url) AS image_url FROM project where process_flow="finished"`;
-connection1.excute(sql,(err,result)=>{
+const sql =`select organizer_email,title,description,CONCAT("http://", localhost3000, "/upload/images/", image_url) AS image_url FROM project where process_flow="finished"`;
+connection1.execute(sql,(err,result)=>{
 if(err){
  return  res.json(err)
 }

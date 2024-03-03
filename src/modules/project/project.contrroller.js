@@ -130,7 +130,7 @@ const changeProjStatus = async function(req, res) {
 
 const getproject = function(req, res) {
     try {
-      const sql = 'SELECT title, description, level, materials, size, comments, organizer_email, skills, CONCAT("http://", ?, "/upload/images/", image_url) AS image_url FROM project';
+      const sql = 'SELECT title, description, level, materials, size, comments, organizer_email, skills,process_flow, CONCAT("http://localhost:3000" , "/upload/images/", image_url) AS image_url FROM project';
       const host = req.headers.host;
   
         connection.execute(sql, [host], (err, result) => {
