@@ -94,15 +94,16 @@ return res.json(result)
 });
 
 }
-const featuredproject=async (req,res)=>{
-  const sql =`select organizer_email,title,description,CONCAT("http://", ?, "/upload/images/", image_url) AS image_url FROM project where featured="yes"`;
-  connection.excute(sql,(err,result)=>{
-    if(err){
-     return  res.json(err)
+const featuredproject = async (req, res) => {
+  const sql = `SELECT organizer_email, title, description, CONCAT("http://", ?, "/upload/images/", image_url) AS image_url FROM project WHERE featured IS NOT NULL ORDER BY featured DESC`;
+  
+  connection.execute(sql, [req.hostname], (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: "Internal server error" });
     }
-    return res.json(result)
-    });
-}
+    return res.json(result);
+  });
+};
 
 const joinevent =async(req,res)=>{
   if(req.user.role !='organizer'){
@@ -115,7 +116,7 @@ if (result[0]!='finished'){
   return res.json({message:"You can't join the event because you'r project doesn't finished yet!"})
 }
 else{
-const sql2=`INSERT INTO events `
+const sql2=`INSERT INTO events `;
 }
 })
 }
