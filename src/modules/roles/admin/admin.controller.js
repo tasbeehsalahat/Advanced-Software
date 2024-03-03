@@ -77,7 +77,7 @@ const selectfeatured=function(req,res){
     if(req.user.role!='admin'){
         return res.json("you cannot access this page")
     }
-const title=req.body
+const {title,feature} =req.body
 const sql = `SELECT process_flow from project where title="${title}"`;
 connection.execute(sql,(err,result)=>{
     if(err){
@@ -87,7 +87,7 @@ connection.execute(sql,(err,result)=>{
         return res.status(400).json({massege :'This project doesnt finish yet'})
     }
   else{
-    const sql2=`UPDATE project SET featured='yes'`;
+    const sql2=`UPDATE project SET featured="${feature}"`;
     connection.execute(sql2,(error,res)=>{
        if (error){
         return res.json(error.stack)
