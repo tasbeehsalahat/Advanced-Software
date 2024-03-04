@@ -96,16 +96,23 @@ const finishedproject = async (req,res)=>{
   const featuredproject = async (req, res) => {
     const sql = `SELECT organizer_email, title, description, CONCAT("http://", ?, "/upload/images/", image_url) AS image_url FROM project WHERE featured IS NOT NULL ORDER BY featured DESC`;
     
-    connection.execute(sql, [req.hostname], (err, result) => {
+    connection1.execute(sql, [req.hostname], (err, result) => {
       if (err) {
         return res.status(500).json({ error: "Internal server error" });
       }
       return res.json(result);
     });
   };
-module.exports = {
-  searchByTerm,
-  getItem,
-  chatGPT,
-  finishedproject,featuredproject
-};
+  const showevent=async (req,res)=>{
+const sql=`select EventName,address from events`
+connection1.execute(sql,(err,result)=>{
+  if(err){
+    return res.json (err)
+  }{ 
+    return res.json(result);
+
+  }
+})
+
+  }
+module.exports = {searchByTerm, getItem,chatGPT,finishedproject,featuredproject,showevent};
