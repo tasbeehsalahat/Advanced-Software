@@ -46,28 +46,31 @@ const addproject = async function (req, res) {
   }
 }
 
-const deleteproject = async function(req, res){
-    const {title, description, level, materials, size, comments, crafter_email, skills} = await req.body;
-    try{     
-        const sql = `DELETE * FROM project WHERE project_id = '${projectId}'`;
+const deleteproject =  function(req, res){
+    const { id } = req.body;
+     try{     
+        if(req.user.role=='crafter' ){
+            return res.json("you cannot access this page")
+        }
+        const sql = `DELETE FROM project WHERE id = '${id}'`;
+         // Execute the SQL query
+         connection.execute(sql, (err, result) => {
+             if (err) {
+                 return res.json(err); // If an error occurs during deletion
+             }
+             // If no error, check if any rows were affected
+             if (result.affectedRows === 0) {
+                 return res.json("No project found with the provided ID"); // If no project found with provided ID
+             }
+             // If successful deletion
+             return res.json("Project deleted successfully");
+         });
+     } catch (err) {
+         return res.json(err); // Catching any unexpected errors
+     }
+ 
+ }
 
-        // Execute the SQL query
-        connection.execute(sql, (err, result) => {
-            if (err) {
-                return res.json(err); // If an error occurs during deletion
-            }
-            // If no error, check if any rows were affected
-            if (result.affectedRows === 0) {
-                return res.json("No project found with the provided ID"); // If no project found with provided ID
-            }
-            // If successful deletion
-            return res.json("Project deleted successfully");
-        });
-    } catch (err) {
-        return res.json(err); // Catching any unexpected errors
-    }
-
-}
 
 const updateproject = async function(req, res){
     const {id,title, description, level, materials, size, comments, skills} = await req.body;
@@ -132,7 +135,7 @@ const changeProjStatus = async function(req, res) {
 
 const getproject = function(req, res) {
     try {
-      const sql = 'SELECT title, description, level, materials, size, comments, organizer_email, skills, CONCAT("http://", ?, "/upload/images/", image_url) AS image_url FROM project';
+      const sql = 'SELECT title, process_flow , description, level, materials, size, comments, organizer_email, skills, CONCAT("http://", ?, "/upload/images/", image_url) AS image_url FROM project';
       const host = req.headers.host;
   
         connection.execute(sql, [host], (err, result) => {

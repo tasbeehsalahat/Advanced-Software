@@ -5,5 +5,5 @@ const router = require('express').Router();
 
 router.post('/login', login)
 router.post('/signup', signup)
-router.delete('/log',authenticateJWT,logout)
+router.delete('/logout',authenticateJWT,logout)
 module.exports = router
