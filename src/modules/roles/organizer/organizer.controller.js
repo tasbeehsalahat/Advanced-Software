@@ -1,6 +1,5 @@
 const connection1 = require('./../../../DB/connection');
 const bcrypt = require('bcrypt');
-const { v4: uuidv4 } = require('uuid');
 const joinevent =async(req,res)=>{
     if(req.user.role !='organizer'){
       return res.json("You can't access this page")

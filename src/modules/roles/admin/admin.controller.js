@@ -1,4 +1,4 @@
-const connection = require("../../../../DB/connection.js");
+const connection = require("../../../../DB/connection.js")
 const bcrypt=require("bcrypt");
 const addCrafter = async function(req, res){
     const {email,UserName,password,skills,intrests,role} = req.body ;
@@ -86,30 +86,15 @@ connection.execute(sql,(err,result)=>{
         return res.status(400).json({massege :'This project doesnt finish yet'})
     }
   else{
-    const sql2=`UPDATE project SET rating="${rating}"`;
-    connection.execute(sql2,(error,res)=>{
+    const sql2=`UPDATE project SET rating=${rating} where title="${title}"`;
+    connection.execute(sql2,(error,resl)=>{
        if (error){
         return res.json(error.stack)
        }
-       return res.json({message:'You have successfully rating this project '})
+       return res.json({message:'You have successfully marked this project '})
     })
   }
 })
 
 }
-const createvent=async function(req,res){
-    if (req.user.role !='admin'){
-        return res.json("you cannot access this page")
-
-    }
-const {EventName,Number,address}=req.body
-const sql = `INSERT INTO events (EventName,Number,address) VALUES ('${EventName}', '${Number}', '${address}') `   
-connection.execute(sql,(err,result)=>{
-if(err){
-    return res.json(err);
-
-}
-return res.json({event : result})
-})
-}
-module.exports ={ addCrafter ,getCrafter,deactivateUser,selectfeatured,createvent} ;
+module.exports ={ addCrafter ,getCrafter,deactivateUser,selectfeatured} ;

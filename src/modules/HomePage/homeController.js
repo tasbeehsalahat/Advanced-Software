@@ -84,24 +84,28 @@ function getItem(req, res) {
   });
 }
 const finishedproject = async (req,res)=>{
-const sql =`select organizer_email,title,description,CONCAT("http://", localhost3000, "/upload/images/", image_url) AS image_url FROM project where process_flow="finished"`;
-connection1.execute(sql,(err,result)=>{
-if(err){
- return  res.json(err)
-}
-return res.json(result)
-});
-
-}
-const featuredproject = async (req, res) => {
-  const sql = `SELECT organizer_email, title, description, CONCAT("http://", ?, "/upload/images/", image_url) AS image_url FROM project WHERE featured IS NOT NULL ORDER BY featured DESC`;
-  
-  connection.execute(sql, [req.hostname], (err, result) => {
-    if (err) {
-      return res.status(500).json({ error: "Internal server error" });
-    }
-    return res.json(result);
+  const sql =`select organizer_email,title,description,CONCAT("http://localhost:3000", "/upload/images/", image_url) AS image_url FROM project where process_flow="finished"`;
+  connection1.execute(sql,(err,result)=>{
+  if(err){
+   return  res.json(err)
+  }
+  return res.json(result)
   });
+  
+  }
+  const featuredproject = async (req, res) => {
+    const sql = `SELECT organizer_email, title, description, CONCAT("http://", ?, "/upload/images/", image_url) AS image_url FROM project WHERE featured IS NOT NULL ORDER BY featured DESC`;
+    
+    connection.execute(sql, [req.hostname], (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: "Internal server error" });
+      }
+      return res.json(result);
+    });
+  };
+module.exports = {
+  searchByTerm,
+  getItem,
+  chatGPT,
+  finishedproject,featuredproject
 };
-
-module.exports = {searchByTerm,getItem,chatGPT,finishedproject,featuredproject,joinevent};
