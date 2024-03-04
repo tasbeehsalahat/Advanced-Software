@@ -33,5 +33,3 @@ const authenticateJWT = (req, res, next) => {
 
 
 module.exports = { authenticateJWT, JWT_SECRET_KEY };
-
-

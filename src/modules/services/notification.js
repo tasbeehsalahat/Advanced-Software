@@ -1,4 +1,4 @@
-const connection = require("../../../DB/connection");
+const connection = require("../../../DB/connection.js");
 
 const notification = async (req, res) => {
     try {

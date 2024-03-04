@@ -7,6 +7,9 @@ app.use(express.json()); // Parse JSON request bodies
 // Define route to reset password
 app.post('/reset-password', (req, res) => {
     const { UserName, newPassword } = req.body;
+    if (!newPassword || !newPassword.match(/^(?=.*[a-zA-Z])(?=.*[0-9])/)) {
+        return res.status(400).json({  message: 'Password must contain both letters and numbers' });
+    }
     updateUserPasswordByUsername(UserName, newPassword, (err, result) => {
         if (err) {
             console.error('Error updating password:', err);

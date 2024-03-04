@@ -11,7 +11,7 @@ app.get('/crafters',authenticateJWT,getCrafter);//view users
 app.patch('/:email',authenticateJWT,updateuser); //update user 
 app.put('/status',authenticateJWT,deactivateUser);
 app.get('/notification',authenticateJWT,notification);
-app.get('/featured projects.',authenticateJWT,featured);
 app.post('/chooseStatus',authenticateJWT,chooseStatus)
+app.post('/selectfeatured',authenticateJWT,selectfeatured)
 module.exports= app ;
 ////////////////////////////////
