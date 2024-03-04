@@ -97,5 +97,19 @@ connection.execute(sql,(err,result)=>{
 })
 
 }
+const createvent=async function(req,res){
+    if (req.user.role !='admin'){
+        return res.json("you cannot access this page")
 
+    }
+const {EventName,Number,address}=req.body
+const sql = `INSERT INTO events (EventName,Number,address) VALUES ('${EventName}', '${Number}', '${address}') `   
+connection.execute(sql,(err,result)=>{
+if(err){
+    return res.json(err);
+
+}
+return res.json({event : result})
+})
+}
 module.exports ={ addCrafter ,getCrafter,deactivateUser,selectfeatured,createvent} ;
