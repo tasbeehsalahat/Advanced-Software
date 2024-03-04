@@ -1,4 +1,4 @@
-const connection = require("../../../DB/connection.js");
+const connection = require("../../../../DB/connection.js")
 const bcrypt=require("bcrypt");
 const addCrafter = async function(req, res){
     const {email,UserName,password,skills,intrests,role} = req.body ;
@@ -73,8 +73,29 @@ const addCrafter = async function(req, res){
         });
     });
 };
-const featured = async function(req, res){
-    const {pid}=req.body;
+const selectfeatured=function(req,res){
+    if(req.user.role!='admin'){
+        return res.json("you cannot access this page")
+    }
+const {title,rating} =req.body
+const sql = `SELECT process_flow from project where title="${title}"`;
+connection.execute(sql,(err,result)=>{
+    if(err){
+        return res.json(err)
+    }
+    if(result[0]=="finished"){
+        return res.status(400).json({massege :'This project doesnt finish yet'})
+    }
+  else{
+    const sql2=`UPDATE project SET rating=${rating} where title="${title}"`;
+    connection.execute(sql2,(error,resl)=>{
+       if (error){
+        return res.json(error.stack)
+       }
+       return res.json({message:'You have successfully marked this project '})
+    })
+  }
+})
 
 }
-module.exports ={ addCrafter ,getCrafter,deactivateUser,featured} ;
+module.exports ={ addCrafter ,getCrafter,deactivateUser,selectfeatured} ;
