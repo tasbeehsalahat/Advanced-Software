@@ -1,4 +1,4 @@
-const connection = require("../../../DB/connection.js");
+const connection = require("../../../../DB/connection.js");
 const bcrypt=require("bcrypt");
 const addCrafter = async function(req, res){
     const {email,UserName,password,skills,intrests,role} = req.body ;
