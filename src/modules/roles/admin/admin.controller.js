@@ -27,7 +27,6 @@ const addCrafter = async function(req, res){
        return res.json(err);
   }
    }
-
    const getCrafter= function(req, res){
     try {
         if(req.user.role!='admin'){
@@ -98,4 +97,5 @@ connection.execute(sql,(err,result)=>{
 })
 
 }
-module.exports ={ addCrafter ,getCrafter,deactivateUser,selectfeatured} ;
+
+module.exports ={ addCrafter ,getCrafter,deactivateUser,selectfeatured,createvent} ;
