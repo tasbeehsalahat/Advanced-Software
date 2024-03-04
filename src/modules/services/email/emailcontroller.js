@@ -1,4 +1,4 @@
-const connection = require('./../../../DB/connection.js');
+const connection = require('./../../../../DB/connection.js');
 const nodemailer = require('nodemailer');
 const express = require('express');
 const generateRandomString = (length) => {

@@ -1,5 +1,5 @@
 const express = require('express');
-const { sendEmailWithRandomCode, compareCodes } = require('./emailcontroller');
+const { sendEmailWithRandomCode, compareCodes } = require('./emailcontroller.js');
 
 const app = express();
 app.use(express.json());
