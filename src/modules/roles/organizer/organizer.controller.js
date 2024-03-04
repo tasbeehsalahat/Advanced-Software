@@ -1,4 +1,4 @@
-const connection1 = require('./../../../DB/connection');
+const connection1 = require('../../../../DB/connection.js');
 const bcrypt = require('bcrypt');
 const joinevent =async(req,res)=>{
     if(req.user.role !='organizer'){

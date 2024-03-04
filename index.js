@@ -20,7 +20,7 @@ app.use('/email',email)
 app.use('/password',password)
 app.use('/upload', express.static('upload'));
 app.use('/collaborations',Collaborations)
-app.use('/Home',Home)
+app.use('/Home',HomePage)
 app.use('*', notfoundpage)
 app.listen(3000,() => {
     console.log('listening on 3000');
