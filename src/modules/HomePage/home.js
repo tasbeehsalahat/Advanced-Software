@@ -8,5 +8,4 @@ router.post('/chatGPT',authenticateJWT,chatGPT);
 router.get('/getItem',authenticateJWT, getItem);
 router.get('/finishedproject',finishedproject);
 router.post('/featuredproject',authenticateJWT,featuredproject);
-router.post('/event',authenticateJWT,joinevent)
 module.exports = router;
