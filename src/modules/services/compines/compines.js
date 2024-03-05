@@ -12,7 +12,7 @@ app.post('/save-info', (req, res) => {
     return res.status(400).json({ message: 'Missing required fields.' });
   }
 
-  const sql = `INSERT INTO jobs (company_name, jop_title, description, skillsneeded, company_email) VALUES (?, ?, ?, ?, ?)`;
+  const sql = `INSERT INTO jobs (company_name, job_title, description, skillsneeded, company_email) VALUES (?, ?, ?, ?, ?)`;
 
   connection.query(sql, [company_name, job_title, description, skillsneeded, company_email], (err, result) => {
     if (err) {
