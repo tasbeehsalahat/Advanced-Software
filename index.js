@@ -3,6 +3,7 @@ const app = express();
 const auth = require('./src/modules/auth/auth.js');
 const project= require('./src/modules/project/project.js');
 const email = require('./src/modules/services/email/email.js');
+const compines= require('./src/modules/services/compines/compines.js');
 const admin = require('./src/modules/roles/admin/admin.js')
 const users = require('./src/modules/roles/users/user.js')
 const organizer = require('./src/modules/roles/organizer/organizer.js')
@@ -19,10 +20,11 @@ app.use('/organizer',organizer)
 app.use('/users',users)
 app.use('/email',email)
 app.use('/password',password)
+app.use('/compines',compines)
 app.use('/upload', express.static('upload'));
 app.use('/collaborations',Collaborations)
 app.use('/Home',Home)
 app.use('*', notfoundpage)
-app.listen(3000,() => {
+app.listen(7896,() => {
     console.log('listening on 3000');
 });
