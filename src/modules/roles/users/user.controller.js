@@ -93,20 +93,29 @@ const shownotification = async (req, res) => {
         if (req.user.role !== 'crafter') {
             return res.json("You cannot access this page");
         }
-
         const userEmail = req.user.email;
-
-        const sql = ` SELECT project_title, status  FROM user_projects WHERE user_email = ? `;
+        const sql = ` SELECT project_title, status  FROM collaboration WHERE user_email = ? `;
 
         connection.execute(sql, [userEmail], (err, results) => {
             if (err) {
-                return res.status(500).json({ error: "Database error" });
+                return res.status(500).json(err.stack);
             }
             if(results.length==0){
                 return res.json({message:"no notification"})
             }
+            // for task //
+            const sql5= `select * from task`
+            connection.execute(sql5,(erre,reu)=>{
+                
+                const matchingObjects = reu.filter(obj2 =>
+                    results.some(obj1 => obj1.project_title === obj2.Project_title)
+                  );
+            const concatenatedArray = results.concat(matchingObjects);
+            return res.json({ notification: concatenatedArray });
+            })
+            
 
-            return res.json({ projects: results });
+            //end task 
         });
     } catch (err) {
         return res.status(500).json({ error: "Internal server error" });
@@ -317,6 +326,36 @@ const chooseMaterial = async (req, res) => {
         return res.json({ message: err.message });
     }
 };
+const statusTask = async (req, res) => {
+    if (req.user.role !== 'crafter') {
+        return res.json("You cannot access this page");
+    }
+
+    const { status, TaskName, Project_title } = req.body;
+
+    try {
+        if (status === 'done') {
+            const s=`select NumofCrafterDoneTask from task where TaskName ="${TaskName}" and Project_title ="${Project_title}" `
+            connection.execute(s,(err,re)=>{
+                const sql = `update task set NumofCrafterDoneTask=(${re[0].NumofCrafterDoneTask} + 1 ) where TaskName ="${TaskName}" and Project_title ="${Project_title}"` 
+                connection.execute(sql, (err, result) => {
+                    if (err) {
+                        console.error('Error executing the query:', err);
+                        return res.json({ error: 'Internal Server Error' });
+                    }
+    
+                    return res.json({ message: "Good job!" });
+                });
+            })           
+            
+        } else {
+            return res.json({ message: "Invalid status value" });
+        }
+    } catch (err) {
+        console.error('Error in the try-catch block:', err);
+        return res.json({ error: 'Internal Server Error' });
+    }
+};
 
 
-module.exports = {updateuser,join,shownotification,match,informations,LendCenter,LendMaterial,chooseMaterial} ;
+module.exports = {updateuser,join,shownotification,match,informations,LendCenter,LendMaterial,chooseMaterial,statusTask} ;
