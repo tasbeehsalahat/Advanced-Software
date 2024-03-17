@@ -2,10 +2,6 @@ const { updateuser , join ,shownotification,match,informations,LendMaterial, Len
 const router = require('express').Router();
 const { authenticateJWT } = require('../../middleware/middleware.js');
 const { filter } = require('../../services/filter.js');
-<<<<<<< HEAD
-const upload = require('./image.js');
-=======
->>>>>>> 8a5a8c0f43fed4ac26b24e79d69ec48b5aaa2f4e
 router.patch('/:email', authenticateJWT,updateuser);//if i want to change a spacific thing
 router.post('/project',authenticateJWT,join);
 router.get('/notification',authenticateJWT,shownotification);

@@ -104,39 +104,30 @@ const fetchMsgs = function(req, res) {
 const clearChat = function(req, res) {
     const { projectName } = req.body;
     try {
-        const allowedRoles = ['organizer', 'admin'];
-        if (!allowedRoles.includes(req.user.role)) {
-            return res.json("You cannot access this page");
-        } else {
-            const isInProjectQuery = `SELECT * FROM collaboration WHERE project_title='${projectName}' AND user_email='${req.user.email}' AND status='accept'`;   
-            const orgOfProjQuery = `SELECT project.organizer_email FROM project JOIN collaboration ON project.title = collaboration.project_title WHERE collaboration.project_title = '${projectName}'`;
+        const orgOfProjQuery = `SELECT project.organizer_email FROM project WHERE project.title = '${projectName}'`;
 
-            connection.query(isInProjectQuery, (error, results) => {
-                if (error) {
-                    return res.json(error);
-                }
-                
-                if (results.length === 0) {
-                    return res.json({ message: 'You cannot clear this chat' });
-                } else {
-                    connection.query(orgOfProjQuery, (error, results) => {
-                        if (error) {
-                            return res.json(error);
-                        }
-                        if (results.length === 0 || results[0].organizer_email !== req.user.email) {
-                            return res.json({ message: 'This project is not yours' });
-                        } else {
-                            // Clear the chat for the specified group
-                            collaborationArrays[projectName] = [];
-                            return res.json({ message: `Chat for ${projectName} has been cleared successfully` });
-                        }
-                    });
-                }
-            });
-        }
+        connection.query(orgOfProjQuery, (error, results) => {
+            if (error) {
+                return res.json(error);
+            }
+
+            if (results.length === 0) {
+                return res.json({ message: 'Project not found' });
+            }
+
+            const organizerEmail = results[0].organizer_email;
+            if (organizerEmail !== req.user.email) {
+                return res.json({ message: 'You are not authorized to clear this chat' });
+            }
+
+            // Clear the chat for the specified project
+            collaborationArrays[projectName] = [];
+            return res.json({ message: `Chat for ${projectName} has been cleared successfully` });
+        });
     } catch (err) {
-       return res.json(err);
+        return res.json(err);
     }
 };
+
 
 module.exports = { sendMsg, fetchMsgs, clearChat };
