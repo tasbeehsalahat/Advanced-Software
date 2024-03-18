@@ -3,7 +3,7 @@ const connection = sql.createConnection({
    host : 'localhost',
    user : 'root',
    password : '',
-   database : 'advan'
+   database : 'craft_db'
 
 })
 
