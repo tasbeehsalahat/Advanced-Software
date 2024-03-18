@@ -103,16 +103,19 @@ const finishedproject = async (req,res)=>{
       return res.json(result);
     });
   };
-  const showevent=async (req,res)=>{
-const sql=`select EventName,address from events`
-connection1.execute(sql,(err,result)=>{
-  if(err){
-    return res.json (err)
-  }{ 
-    return res.json(result);
+  const showevent = async (req, res) => {
+    const sql = `SELECT EventName, address FROM events`;
+    try {
+        connection1.execute(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json(err);
+            } else {
+                return res.status(200).json(result);
+            }
+        });
+    } catch (error) {
+        return res.status(500).json(error);
+    }
+};
 
-  }
-})
-
-  }
 module.exports = {searchByTerm, getItem,chatGPT,finishedproject,featuredproject,showevent};

@@ -5,7 +5,7 @@ const addCrafter = async function(req, res){
     const hashedPassword = await bcrypt.hash(password, 10);
     try{  
         if(req.user.role!='admin'){
-            return res.json("you cannot access this page")
+            return res.status(401).json("you cannot access this page")
         }   
         if (!email || !email.includes('@') || !email.endsWith('.com')) {
             return res.status(400).json({  message: 'Invalid email format' });
@@ -20,7 +20,7 @@ const addCrafter = async function(req, res){
                return res.json("this email is already exist");
            }
        }
-       return res.json("added successfully");
+       return res.status(200).json("added successfully");
     });
    }
    catch(err){
@@ -30,14 +30,14 @@ const addCrafter = async function(req, res){
    const getCrafter= function(req, res){
     try {
         if(req.user.role!='admin'){
-            return res.json("you cannot access this page")
+            return res.status(401).json("you cannot access this page")
         }
         const sql = 'SELECT * FROM users where role !="admin"'
     connection.execute(sql, (err, result)=>{
         if(err){
             return res.json(err);
         }
-        return res.json({users : result})
+        return res.status(200).json({users : result})
     })    
 
     }catch(err){
@@ -45,9 +45,9 @@ const addCrafter = async function(req, res){
     }
    }
    const deactivateUser = async function(request, response) {
-    const { email } = request.body; // Assuming email is provided in the request params
-    if(request.user.role!='admin'){
-        return res.json("you cannot access this page")
+    const { email } = request.body;
+    if(request.user.role !== 'admin') {
+        return response.status(401).json("You cannot access this page");
     }
     const Sql = `SELECT * FROM users WHERE email = '${email}' AND status = 'active' `;
     connection.execute(Sql, function(error, results) {
@@ -68,10 +68,11 @@ const addCrafter = async function(req, res){
             if (error) {
                 return response.status(500).json({ error: 'Unable to deactivate user' });
             }
-            return response.json("User deactivated successfully");
+            return response.status(200).json("User deactivated successfully");
         });
     });
 };
+
 const selectfeatured=function(req,res){
     if(req.user.role!='admin'){
         return res.json("you cannot access this page")
@@ -98,25 +99,23 @@ connection.execute(sql,(err,result)=>{
 
 }
 const createvent = async function(req, res) {
-    if(req.user.role!='admin'){
-        return res.json("you cannot access this page")
+    if(req.user.role !== 'admin') {
+        return res.status(401).json("You cannot access this page");
     } 
     const { EventName, Number, address } = req.body;
     
     try {
         const sql = `INSERT INTO events (EventName, number, address) VALUES ('${EventName}', ${Number}, '${address}')`;
-      connection.execute(sql,(err,result)=>{
-        if(err) {
-            if(err.errno==1062){
-                return res.json("this Event already exist");
+        connection.execute(sql, (err, result) => {
+            if(err) {
+                if(err.errno == 1062) {
+                    return res.status(400).json("This event already exists");
+                }
+                return res.status(500).json(err.stack);
             }
-            return res.json(err.stack)
-        }
-return res.json("You created an event successfully!");
-  
-})    
- } 
- catch (error) {
+            return res.status(200).json("You created an event successfully!");
+        });
+    } catch (error) {
         return res.status(500).json(error.stack);
     }
 };

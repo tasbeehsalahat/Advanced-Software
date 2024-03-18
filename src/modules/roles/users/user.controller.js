@@ -6,24 +6,19 @@ const updateuser = async (request, response) => {
     const userEmail = request.params.email; // Correctly access email from request parameters
 
     if (request.user.role === 'organizer') {
-        return response.json("You cannot access this page");
-    }  
-        else if (request.user.role === 'crafter') {
-            const sql = `UPDATE users SET ${Object.entries(otherUpdates).map(([key, value]) => `${key} = "${value}"`).join(', ')} WHERE email = '${request.user.email}';`;
-            connection.execute(sql,  (error, results) => {
-              if (error) {
-                return response.json(error)
-              }
-            return response.json({massege:"updated succesfully"})
-            
-            })
-        
-            
+        return response.status(401).json("You cannot access this page");
+    } else if (request.user.role === 'crafter') {
+        const sql = `UPDATE users SET ${Object.entries(otherUpdates).map(([key, value]) => `${key} = "${value}"`).join(', ')} WHERE email = '${request.user.email}';`;
+        connection.execute(sql,  (error, results) => {
+            if (error) {
+                return response.status(500).json(error)
+            }
+            return response.status(200).json({ message: "Updated successfully" });
+        })
     } else {
-        return response.json("Unknown role");
+        return response.status(400).json("Unknown role");
     }
 };
-
 
 const join = async (req, res) => {
     try{
