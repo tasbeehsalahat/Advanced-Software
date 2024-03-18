@@ -6,5 +6,5 @@ router.post('/project',authenticateJWT, addproject);
 router.delete('/project', authenticateJWT,deleteproject);
 router.put('/project', authenticateJWT,updateproject);
 router.get('/project',authenticateJWT, getproject);
-router.patch('/UpdateProjStatus',authenticateJWT,changeProjStatus)
+router.patch('/ProjStatus',authenticateJWT,changeProjStatus)
 module.exports = router;

@@ -337,13 +337,16 @@ const statusTask = async (req, res) => {
         if (status === 'done') {
             const s=`select NumofCrafterDoneTask from task where TaskName ="${TaskName}" and Project_title ="${Project_title}" `
             connection.execute(s,(err,re)=>{
+                if(!re.affectedRows)return res.json({ massege:"no user found" });
                 const sql = `update task set NumofCrafterDoneTask=(${re[0].NumofCrafterDoneTask} + 1 ) where TaskName ="${TaskName}" and Project_title ="${Project_title}"` 
                 connection.execute(sql, (err, result) => {
                     if (err) {
                         console.error('Error executing the query:', err);
                         return res.json({ error: 'Internal Server Error' });
                     }
-    
+                     if(!result.affectedRows){
+                        return res.json({ massege:"no user task" });
+                     }
                     return res.json({ message: "Good job!" });
                 });
             })           

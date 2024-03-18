@@ -8,7 +8,7 @@ const router = require('express').Router();
 router.get('/filter',filter);
 router.get('/notification',authenticateJWT,notification);
 router.get('/chooseStatus',authenticateJWT,chooseStatus);
-router.post('/addtasks',authenticateJWT,addtasks);
+router.post('/tasks',authenticateJWT,addtasks);
 router.get('/showTask',authenticateJWT,showTask);
 module.exports = router;
 

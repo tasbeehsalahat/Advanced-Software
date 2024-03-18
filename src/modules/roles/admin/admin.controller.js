@@ -83,7 +83,7 @@ connection.execute(sql,(err,result)=>{
     if(err){
         return res.json(err)
     }
-    if(result[0]=="finished"){
+    if(result[0]!="finished"){
         return res.status(400).json({massege :'This project doesnt finish yet'})
     }
   else{
