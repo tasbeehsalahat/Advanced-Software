@@ -1,7 +1,7 @@
 const { authenticateJWT } = require('../../middleware/middleware.js');
 const { filter } = require('../../services/filter.js');
 const { notification, chooseStatus } = require('../../services/notification.js');
-const { joinevent } = require('./organizer.controller.js');
+const { joinevent, addtasks, showTask } = require('./organizer.controller.js');
 const router = require('express').Router();
 
 
