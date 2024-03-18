@@ -101,4 +101,33 @@ const fetchMsgs = function(req, res) {
     }
 
 };
-module.exports = {sendMsg,fetchMsgs};
+const clearChat = function(req, res) {
+    const { projectName } = req.body;
+    try {
+        const orgOfProjQuery = `SELECT project.organizer_email FROM project WHERE project.title = '${projectName}'`;
+
+        connection.query(orgOfProjQuery, (error, results) => {
+            if (error) {
+                return res.json(error);
+            }
+
+            if (results.length === 0) {
+                return res.json({ message: 'Project not found' });
+            }
+
+            const organizerEmail = results[0].organizer_email;
+            if (organizerEmail !== req.user.email) {
+                return res.json({ message: 'You are not authorized to clear this chat' });
+            }
+
+            // Clear the chat for the specified project
+            collaborationArrays[projectName] = [];
+            return res.json({ message: `Chat for ${projectName} has been cleared successfully` });
+        });
+    } catch (err) {
+        return res.json(err);
+    }
+};
+
+
+module.exports = { sendMsg, fetchMsgs, clearChat };
