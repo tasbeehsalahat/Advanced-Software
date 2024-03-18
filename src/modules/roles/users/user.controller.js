@@ -8,7 +8,6 @@ const updateuser = async (request, response) => {
     if (request.user.role === 'organizer') {
         return response.json("You cannot access this page");
     }  
-        else if (request.user.role === 'crafter') {
             const sql = `UPDATE users SET ${Object.entries(otherUpdates).map(([key, value]) => `${key} = "${value}"`).join(', ')} WHERE email = '${request.user.email}';`;
             connection.execute(sql,  (error, results) => {
               if (error) {
@@ -18,10 +17,6 @@ const updateuser = async (request, response) => {
             
             })
         
-            
-    } else {
-        return response.json("Unknown role");
-    }
 };
 
 
@@ -126,14 +121,10 @@ const match = async function (req, res) {
                 return res.status(500).json({ error: "Database error" });
             }
 
-            if (rlt.length === 0) {
-                return res.json({ message: "No matching user found" });
-            }
-
             const userskills = rlt[0].skills;
             const intrests = rlt[0].intrests;
 
-            const sql2 = `SELECT email, skills FROM users WHERE skills = ? AND intrests = ? AND email != ? AND role!="organizer"`;
+            const sql2 = `SELECT email, skills FROM users WHERE skills = ? or intrests = ? AND email != ? AND role!="organizer"`;
 
             connection.execute(sql2, [userskills, intrests, email], (err, results) => {
                 if (err) {
