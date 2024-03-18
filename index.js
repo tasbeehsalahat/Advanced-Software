@@ -24,7 +24,7 @@ app.use('/compines',compines)
 app.use('/upload', express.static('upload'));
 app.use('/collaborations',Collaborations)
 app.use('/Home',Home)
-
+app.use('*', notfoundpage)
 app.listen(3000,() => {
     console.log('listening on 3000');
 });
