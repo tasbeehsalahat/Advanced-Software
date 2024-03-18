@@ -1,4 +1,4 @@
-const { updateuser , join ,shownotification,match,informations,LendMaterial, LendCenter,chooseMaterial,statusTask} = require('./user.controller.js');
+const { updateuser , join ,shownotification,match,informations,LendMaterial, LendCenter,chooseMaterial,statusTask,joinjob} = require('./user.controller.js');
 const router = require('express').Router();
 const { authenticateJWT } = require('../../middleware/middleware.js');
 const { filter } = require('../../services/filter.js');
@@ -12,6 +12,7 @@ router.post('/LendCenter',authenticateJWT,LendCenter);
 router.get('/LendMaterial',authenticateJWT,LendMaterial);
 router.post('/chooseMaterial',authenticateJWT,chooseMaterial);
 router.post('/statusTask',authenticateJWT,statusTask);
+router.post('/joinjob',authenticateJWT,joinjob);
 
 module.exports = router;
 
