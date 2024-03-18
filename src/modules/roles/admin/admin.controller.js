@@ -17,7 +17,7 @@ const addCrafter = async function(req, res){
    connection.execute(sql,(err, result) => {
        if(err) {
            if(err.errno==1062){
-               return res.json("this is email is already exist");
+               return res.json("this email is already exist");
            }
        }
        return res.json("added successfully");
@@ -27,7 +27,6 @@ const addCrafter = async function(req, res){
        return res.json(err);
   }
    }
-
    const getCrafter= function(req, res){
     try {
         if(req.user.role!='admin'){
@@ -98,4 +97,29 @@ connection.execute(sql,(err,result)=>{
 })
 
 }
-module.exports ={ addCrafter ,getCrafter,deactivateUser,selectfeatured} ;
+const createvent = async function(req, res) {
+    if(req.user.role!='admin'){
+        return res.json("you cannot access this page")
+    } 
+    const { EventName, Number, address } = req.body;
+    
+    try {
+        const sql = `INSERT INTO events (EventName, number, address) VALUES ('${EventName}', ${Number}, '${address}')`;
+      connection.execute(sql,(err,result)=>{
+        if(err) {
+            if(err.errno==1062){
+                return res.json("this Event already exist");
+            }
+            return res.json(err.stack)
+        }
+return res.json("You created an event successfully!");
+  
+})    
+ } 
+ catch (error) {
+        return res.status(500).json(error.stack);
+    }
+};
+
+
+module.exports ={ addCrafter ,getCrafter,deactivateUser,selectfeatured,createvent} ;
