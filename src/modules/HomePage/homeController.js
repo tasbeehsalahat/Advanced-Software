@@ -2,6 +2,7 @@ const connection1= require('../../../DB/connection.js');
 
 const request = require('request');
 
+const connection=  require('./../../../DB/connection.js')
 function searchByTerm(req, res) {
   const { source, country, values } = req.body;
   const options = {
@@ -118,4 +119,64 @@ const finishedproject = async (req,res)=>{
     }
 };
 
-module.exports = {searchByTerm, getItem,chatGPT,finishedproject,featuredproject,showevent};
+ 
+
+  let CommentArrays = {};
+function addCommentToProj(projectName, message) {
+    if (!CommentArrays[projectName]) {
+      CommentArrays[projectName] = []; // Create a new dynamic array if it doesn't exist
+    }
+    CommentArrays[projectName].push(message); // Add the message to the dynamic array
+}
+const commentOnProj = async function(req, res) {
+  const { projectName, content } = req.body;
+  try {
+      const allowedRoles = ['crafter', 'organizer', 'admin'];
+      if (!allowedRoles.includes(req.user.role)) {
+          return res.json("You cannot access this page");
+      } else {
+          const projectQuery = `SELECT process_flow FROM project WHERE title='${projectName}'`;
+
+          connection.query(projectQuery, (error, results) => {
+              if (error) {
+                  return res.json(error);
+              }
+
+              if (results.length === 0) {
+                  return res.json({ message: 'Project not found' });
+              }
+
+              const processFlow = results[0].process_flow;
+              if (processFlow !== 'finished') {
+                  return res.json({ message: 'Cannot comment on project until process_flow is finished' });
+              }
+
+              const Message = `${req.user.email}: ${content}`;
+              addCommentToProj(projectName, Message);
+              return res.json(`Commented On ${projectName} Successfully`);
+          });
+      }
+  } catch (err) {
+      return res.json(err);
+  }
+};
+
+const getCommentsForProj = async function(req, res) {
+  const { projectName } = req.body;
+  try {
+          const comments = CommentArrays[projectName] || [];
+          return res.json(comments);
+  } catch (err) {
+      return res.json(err);
+  }
+};
+
+module.exports = {
+  searchByTerm,
+  getItem,
+  chatGPT,
+  finishedproject,
+  commentOnProj,
+  getCommentsForProj,
+  featuredproject,showevent
+};
