@@ -27,13 +27,13 @@ const join = async (req, res) => {
     if(req.user.role !='crafter'){
         return response.json("you cannot access this page")
     }
-    const sqll= `select skills from users where email = "${user_email}"`
+    const sqll= `select skills , materials from users where email = "${user_email}"`
     connection.execute(sqll,(err,ressl)=>{
         
         const sqll2= `select skills from project where title = "${project_title }"`
         connection.execute(sqll2,(err,ress2)=>{
               if(ressl[0].skills==ress2[0].skills){
-                const sql2 = `SELECT NumofMem, size FROM project WHERE title="${project_title}"`;
+                const sql2 = `SELECT NumofMem, size ,materials FROM project WHERE title="${project_title}"`;
       
     connection.execute(sql2, (err, result) => {
       if (err) {
@@ -41,7 +41,9 @@ const join = async (req, res) => {
       }
   
       if (result[0].size > result[0].NumofMem) {
-
+        if (!result[0].materials.split(',').map(material => ressl[0].materials.split(",").includes(material))) {
+            return res.json({ message: "You don't have any of the materials needed in this project" });
+        }
         const sql = 'INSERT INTO collaboration (user_email, project_title) VALUES (?, ?)';
         const values = [user_email, project_title];
     
@@ -165,12 +167,19 @@ const LendCenter = async (req, res) => {
     
     const { Material, Quantity, title } = req.body;
     const email = req.user.email;
-
-    const sql = `SELECT project_title FROM collaboration WHERE user_email='${email}'`;
+     
+    const s = `select materials from users where email='${email}'`
+    connection.execute(s,(err,reslu)=>{
+        console.log(reslu)
+        if(!reslu[0].materials.split(',').includes(Material)){
+            return res.json({massege:"you dont have this material"})
+        }
+    
+    const sql = `SELECT project_title FROM collaboration WHERE user_email='${email}' and status ="accept"`;
 
     connection.execute(sql, (err, result) => {
         if (err) {
-            return res.json(err.stack);
+            return res.json({massege : "you are already added this material"});
         }
 
         // Check if the result array has at least one item
@@ -192,9 +201,10 @@ const LendCenter = async (req, res) => {
                 return res.json({ message: "You haven't joined this project" });
             }
         } else {
-            return res.json({ message: "You haven't joined any projects" });
+            return res.json({ message: "You haven't joined any projects or your request pendding" });
         }
     });
+})
 };
 
 const LendMaterial = async (req, res) => {
@@ -251,7 +261,7 @@ const chooseMaterial = async (req, res) => {
         const { material, email } = req.body;
 
         // Check if the user already has the material
-        const selectMaterialsSql = 'SELECT materials FROM users WHERE email = ?';
+        const selectMaterialsSql = 'SELECT materials FROM users WHERE email = ? ';
         connection.execute(selectMaterialsSql, [req.user.email], (err, result) => {
             if (err) {
                 return res.json({ message: "Error checking user materials" });
@@ -307,7 +317,7 @@ const chooseMaterial = async (req, res) => {
 };
 const statusTask = async (req, res) => {
     if (req.user.role !== 'crafter') {
-        return res.json("You cannot access this page");
+        return res.status(401).json("You cannot access this page");
     }
 
     const { status, TaskName, Project_title } = req.body;
@@ -316,17 +326,18 @@ const statusTask = async (req, res) => {
         if (status === 'done') {
             const s=`select NumofCrafterDoneTask from task where TaskName ="${TaskName}" and Project_title ="${Project_title}" `
             connection.execute(s,(err,re)=>{
-                if(!re.affectedRows)return res.json({ massege:"no user found" });
+                 if(re.length==0)return res.status(400).json({massege :"You dont join to this project"})
                 const sql = `update task set NumofCrafterDoneTask=(${re[0].NumofCrafterDoneTask} + 1 ) where TaskName ="${TaskName}" and Project_title ="${Project_title}"` 
                 connection.execute(sql, (err, result) => {
+                    
                     if (err) {
                         console.error('Error executing the query:', err);
-                        return res.json({ error: 'Internal Server Error' });
+                        return res.status(500).json({ error: 'Internal Server Error' });
                     }
                      if(!result.affectedRows){
-                        return res.json({ massege:"no user task" });
+                        return res.status(400).json({ massege:" no tasks associated with the specified parameters" });
                      }
-                    return res.json({ message: "Good job!" });
+                    return res.status(200).json({ message: "Good job!" });
                 });
             })           
             
@@ -335,7 +346,7 @@ const statusTask = async (req, res) => {
         }
     } catch (err) {
         console.error('Error in the try-catch block:', err);
-        return res.json({ error: 'Internal Server Error' });
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
 };
 

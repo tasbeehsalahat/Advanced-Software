@@ -83,7 +83,7 @@ const updateproject = async function(req, res){
         if (error) {
             return res.json(error);
         }
-        return res.json("Updated successfully");
+        return res.status(200).json({massege : "Updated successfully"})
     });
 }
 
@@ -91,7 +91,7 @@ const changeProjStatus = async function(req, res) {
     const title = req.body.title;
     let newStatus = '';
 
-    if(req.user.role === 'crafter' || req.user.role === 'admin') {
+    if(req.user.role === 'crafter') {
         return res.json("You cannot access this page");
     }
 

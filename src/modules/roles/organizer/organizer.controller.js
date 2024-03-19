@@ -1,4 +1,4 @@
-const connection1 = require('../../../../DB/connection.js');
+const connection = require('../../../../DB/connection.js');
 
 const joinevent = async (req, res) => {
     if (req.user.role !== 'organizer') {
@@ -32,7 +32,7 @@ if (result.length==0){
                     if (error) {
                         return res.json(error);
                     }
-                    const sql2 = `UPDATE project SET EventName="${eventName}" WHERE title="${title}"`;
+                    const sql2 =` UPDATE project SET EventName="${eventName}" WHERE title="${title}"`;
                     connection1.execute(sql2, (err, result) => {
                         if (err) {
                             if (err.errno == 1062) {
@@ -50,68 +50,74 @@ if (result.length==0){
 };
 
 
-const addtasks = (req,res)=>{
-    if(req.user.role !='organizer'){
-        return response.json("you cannot access this page")
+const addtasks = (req, res) => {
+    if (req.user.role !== 'organizer') {
+        return res.status(401).json("You cannot access this page");
     }
-    const email = req.user.email ;
-    const {project_title , taskName , description} = req.body;
+    const email = req.user.email;
+    const { project_title, taskName, description } = req.body;
 
-    const s = `select title from project where organizer_email='${email}'`
-    connection.execute(s,(err,ress)=>{
-        if(ress.some(obj => obj.title === project_title)){
-            const sql = `INSERT INTO task (project_title,taskName, description) VALUES ('${project_title}', '${taskName}', '${description}') `   
+    const s = `SELECT title FROM project WHERE organizer_email='${email}'`;
+    connection.execute(s, (err, ress) => {
+        if (err) {
+            return res.status(500).json(err);
+        }
+        if (ress.some(obj => obj.title === project_title)) {
+            const sql =` INSERT INTO task (project_title, taskName, description) VALUES ('${project_title}', '${taskName}', '${description}')`;
             try{
-                connection.execute(sql,(err,resl)=>{
-                    return res.json({massege : "added successfully"})
-                })
-            }catch(err){
-                if(err){
-                    return res.json(err.stack)
+                connection.execute(sql, (error, resl) => {
+                    if (error) {
+                        return res.status(400).json({massege : " this task is already exists" });
+                    }
+                    return res.status(200).json({ message: "Added successfully" });
+                });
+            }catch(e){
+                if(e){
+                    
                 }
             }
-            
+        } else {
+            return res.status(400).json({ message: "You are not an organizer for this project" });
         }
-        else {
-            return res.json({massege : "you are not organizer for this project"});
-        }
-    })
+    });
+};
 
-}
 const showTask = (req, res) => {
-    let arr = [];
     try {
         if (req.user.role !== 'organizer') {
-            return res.json("You cannot access this page");
+            return res.status(401).json("You cannot access this page");
         }
 
         const email = req.user.email;
-        const s = `select title from project where organizer_email='${email}'`;
+        const s = `SELECT title FROM project WHERE organizer_email='${email}'`;
 
         connection.execute(s, (err, ress) => {
             if (err) {
-                return res.json(err);
+                return res.status(500).json(err);
             }
 
-            for (let x = 0; x < ress.length; x++) {
-                const sql = `select * from task where Project_title='${ress[x].title}'`;
+            let tasks = [];
 
-                connection.execute(sql, (err, result) => {
-                    if (err) {
-                        return res.json(err);
+            for (let x = 0; x < ress.length; x++) {
+                const sql = `SELECT * FROM task WHERE Project_title='${ress[x].title}'`;
+
+                connection.execute(sql, (error, result) => {
+                    if (error) {
+                        return res.status(500).json(error);
                     }
-                    console.log(result);
-                    // Use push to add elements to the array
-                    arr.push(result);
-                    
-            return res.json({ arr });
+
+                    tasks.push(...result);
+
+                    if (x === ress.length - 1) {
+                        return res.status(200).json(tasks);
+                    }
                 });
-                
             }
         });
     } catch (err) {
-        res.json(err);
+        return res.status(500).json(err);
     }
 };
+
 
 module.exports = { addtasks,showTask,joinevent };
