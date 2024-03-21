@@ -16,6 +16,9 @@ const upload = multer({
 const addproject = async function (req, res) {
     try {
     upload(req, res, function (err) {
+        if (req.user.role === 'crafter') {
+            return res.json("You cannot access this page");
+        }
         if (err instanceof multer.MulterError) {
             return res.json({ error: err.message });
         } else if (err) {
@@ -23,16 +26,14 @@ const addproject = async function (req, res) {
         }
         const { title, description, level, materials, size, comments, organizer_email, skills } = req.body;
         const image = req.file ? req.file.filename : null; 
-        if (req.user.role === 'crafter') {
-            return res.json("You cannot access this page");
-        }
+      
 
         const sql = `INSERT INTO project (title, description, level, materials, size, comments, organizer_email, skills, image_url) VALUES ("${title}",
         "${description}", "${level}", "${materials}", "${size}", "${comments}","${organizer_email}","${skills}", "${image}")`;
         connection.execute(sql, [title, description, level, materials, size, comments, organizer_email, skills, image], (err, result) => {
             if (err) {
                 if (err.errno == 1452) {
-                    return res.json({ message: "This email doesn't exist" });
+                    return res.json({ message: "This organizer doesn't exist" });
                 } else {
                     return res.json(err.stack);
                 }
@@ -48,44 +49,102 @@ const addproject = async function (req, res) {
 
 const deleteproject =  function(req, res){
     const { id } = req.body;
+    const email = req.user.email ;
      try{     
         if(req.user.role=='crafter' ){
+           
             return res.json("you cannot access this page")
         }
-        const sql = `DELETE FROM project WHERE id = '${id}'`;
-         // Execute the SQL query
-         connection.execute(sql, (err, result) => {
-             if (err) {
-                 return res.json(err); // If an error occurs during deletion
-             }
-             // If no error, check if any rows were affected
-             if (result.affectedRows === 0) {
-                 return res.json("No project found with the provided ID"); // If no project found with provided ID
-             }
-             // If successful deletion
-             return res.json("Project deleted successfully");
-         });
+        if(req.user.role=='organizer' ){
+           const sqll= `select id from project where organizer_email="${email}"`
+           connection.execute(sqll,(err,ree)=>{
+            if(err){
+                return res.status(500).json(err.stack)
+            }
+            ree.map(obj=>{
+                if(obj.id==id){
+                    const sql = `DELETE FROM project WHERE id = ${id}`;
+                    // Execute the SQL query
+                    connection.execute(sql, (err, result) => {
+                        if (err) {
+                            return res.json(err.stack); // If an error occurs during deletion
+                        }
+                        // If no error, check if any rows were affected
+                        if (result.affectedRows === 0) {
+                            return res.json("No project found with the provided ID"); // If no project found with provided ID
+                        }
+                        // If successful deletion
+                        return res.json("Project deleted successfully");
+                    });
+                }else {
+                    return res.status(400).json({massege : " you dont organize this project"})
+                }
+            })
+           })
+        }
+        ///if it admin 
+        const sql = `DELETE FROM project WHERE id = ${id}`;
+        // Execute the SQL query
+        connection.execute(sql, (err, result) => {
+            if (err) {
+                return res.json(err.stack); // If an error occurs during deletion
+            }
+            // If no error, check if any rows were affected
+            if (result.affectedRows === 0) {
+                return res.json("No project found with the provided ID"); // If no project found with provided ID
+            }
+            // If successful deletion
+            return res.json("Project deleted successfully");
+        });
+        
+       
      } catch (err) {
-         return res.json(err); // Catching any unexpected errors
+         return res.json(err.stack); // Catching any unexpected errors
      }
  
  }
 
 
-const updateproject = async function(req, res){
-    const {id,title, description, level, materials, size, comments, skills} = await req.body;
+ const updateproject = async function(req, res) {
+    const otherUpdates = await req.body;
 
-    const sql = `UPDATE project
-                 SET title='${title}', description='${description}', level=${level}, materials='${materials}', size=${size}, comments='${comments}', skills='${skills}'
-                 WHERE id=${id}`;
-                 
-    connection.execute(sql, function(error, result) {
-        if (error) {
-            return res.json(error);
-        }
-        return res.status(200).json({massege : "Updated successfully"})
-    });
-}
+    if (req.user.role === 'crafter') {
+        return res.json("You cannot access this page");
+    }
+
+    if (req.user.role === 'organizer') {
+        const sqll = `SELECT id FROM project WHERE organizer_email="${req.user.email}"`;
+        connection.execute(sqll, (err, ree) => {
+            if (err) {
+                return res.status(500).json(err.stack);
+            }
+
+            let organizedProjects = ree.map(obj => obj.id);
+
+            if (organizedProjects.includes(otherUpdates.id)) {
+                const sql = `UPDATE project SET ${Object.entries(otherUpdates).map(([key, value]) => `${key} = "${value}"`).join(', ')} WHERE organizer_email  = '${req.user.email}' AND id = ${otherUpdates.id}`;
+                
+                connection.execute(sql, function(error, result) {
+                    if (error) {
+                        return res.status(500).json(error);
+                    }
+                    return res.status(200).json({ message: "Updated successfully" });
+                });
+            } else {
+                return res.status(400).json({ message: "You don't organize this project so you can't update it" });
+            }
+        });
+    } else { // admin
+        const sql = `UPDATE project SET ${Object.entries(otherUpdates).map(([key, value]) => `${key} = "${value}"`).join(', ')} WHERE organizer_email  = '${req.user.email}'`;    
+        
+        connection.execute(sql, function(error, result) {
+            if (error) {
+                return res.status(500).json(error);
+            }
+            return res.status(200).json({ message: "Updated successfully" });
+        });
+    }
+};
 
 const changeProjStatus = async function(req, res) {
     const title = req.body.title;
@@ -134,8 +193,15 @@ const changeProjStatus = async function(req, res) {
 };
 
 const getproject = function(req, res) {
+    let sql ;
     try {
-      const sql = 'SELECT title, process_flow , description, level, materials, size, comments, organizer_email, skills, CONCAT("http://", ?, "/upload/images/", image_url) AS image_url FROM project';
+        if (req.user.role === 'crafter') {
+            return res.json("You cannot access this page");
+        }
+        if(req.user.role === 'organizer') {
+             sql = `SELECT title, process_flow , description, level, materials, size, comments, organizer_email, skills, CONCAT("http://", ?, "/upload/images/", image_url) AS image_url FROM project where organizer_email = "${req.user.email}"`;
+        }
+       else sql = 'SELECT title, process_flow , description, level, materials, size, comments, organizer_email, skills, CONCAT("http://", ?, "/upload/images/", image_url) AS image_url FROM project';
       const host = req.headers.host;
   
         connection.execute(sql, [host], (err, result) => {

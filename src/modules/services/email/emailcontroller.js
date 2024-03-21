@@ -9,7 +9,7 @@ const generateRandomString = (length) => {
     }
     return result;
 };
- async function sendMaill(recipientEmail){
+ async function sendMaill(receiver){
 const transporter = nodemailer.createTransport({
     service: 'Gmail',
     auth: {
@@ -17,12 +17,12 @@ const transporter = nodemailer.createTransport({
         pass: 'vptb poko wows hmtn'           
     }
 });
-console.log(recipientEmail)
 
 const code = generateRandomString(10); 
  const  sendEmailWithRandomCode = await transporter.sendMail({
+
         from: 'Community of crafts',  
-        to: recipientEmail,                  
+        to: receiver,                  
         subject: 'Password Recovery Code',  
         html: `<p>Your password recovery code is: <strong>${code}</strong></p>` 
 });
