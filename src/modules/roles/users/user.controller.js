@@ -6,19 +6,19 @@ const updateuser = async (request, response) => {
     const userEmail = request.params.email; // Correctly access email from request parameters
 
     if (request.user.role === 'organizer') {
-        return response.json("You cannot access this page");
-    }  
-            const sql = `UPDATE users SET ${Object.entries(otherUpdates).map(([key, value]) => `${key} = "${value}"`).join(', ')} WHERE email = '${request.user.email}';`;
-            connection.execute(sql,  (error, results) => {
-              if (error) {
-                return response.json(error)
-              }
-            return response.json({massege:"updated succesfully"})
-            
-            })
-        
+        return response.status(401).json("You cannot access this page");
+    } else if (request.user.role === 'crafter') {
+        const sql = `UPDATE users SET ${Object.entries(otherUpdates).map(([key, value]) => `${key} = "${value}"`).join(', ')} WHERE email = '${request.user.email}';`;
+        connection.execute(sql,  (error, results) => {
+            if (error) {
+                return response.status(500).json(error)
+            }
+            return response.status(200).json({ message: "Updated successfully" });
+        })
+    } else {
+        return response.status(400).json("Unknown role");
+    }
 };
-
 
 const join = async (req, res) => {
     try{
@@ -27,13 +27,13 @@ const join = async (req, res) => {
     if(req.user.role !='crafter'){
         return response.json("you cannot access this page")
     }
-    const sqll= `select skills , materials from users where email = "${user_email}"`
+    const sqll= `select skills from users where email = "${user_email}"`
     connection.execute(sqll,(err,ressl)=>{
         
         const sqll2= `select skills from project where title = "${project_title }"`
         connection.execute(sqll2,(err,ress2)=>{
               if(ressl[0].skills==ress2[0].skills){
-                const sql2 = `SELECT NumofMem, size ,materials FROM project WHERE title="${project_title}"`;
+                const sql2 = `SELECT NumofMem, size FROM project WHERE title="${project_title}"`;
       
     connection.execute(sql2, (err, result) => {
       if (err) {
@@ -41,9 +41,7 @@ const join = async (req, res) => {
       }
   
       if (result[0].size > result[0].NumofMem) {
-        if (!result[0].materials.split(',').map(material => ressl[0].materials.split(",").includes(material))) {
-            return res.json({ message: "You don't have any of the materials needed in this project" });
-        }
+       
         const sql = 'INSERT INTO collaboration (user_email, project_title) VALUES (?, ?)';
         const values = [user_email, project_title];
     
@@ -168,14 +166,7 @@ const LendCenter = async (req, res) => {
     const { Material, Quantity, title } = req.body;
     const email = req.user.email;
      
-    const s = `select materials from users where email='${email}'`
-    connection.execute(s,(err,reslu)=>{
-        console.log(reslu)
-        if(!reslu[0].materials.split(',').includes(Material)){
-            return res.json({massege:"you dont have this material"})
-        }
-    
-    const sql = `SELECT project_title FROM collaboration WHERE user_email='${email}' and status ="accept"`;
+    const sql = `SELECT project_title FROM collaboration WHERE user_email='${email}'`;
 
     connection.execute(sql, (err, result) => {
         if (err) {
@@ -204,8 +195,7 @@ const LendCenter = async (req, res) => {
             return res.json({ message: "You haven't joined any projects or your request pendding" });
         }
     });
-})
-};
+}
 
 const LendMaterial = async (req, res) => {
     if (req.user.role !== 'crafter') {
@@ -261,7 +251,7 @@ const chooseMaterial = async (req, res) => {
         const { material, email } = req.body;
 
         // Check if the user already has the material
-        const selectMaterialsSql = 'SELECT materials FROM users WHERE email = ? ';
+        const selectMaterialsSql = 'SELECT materials FROM users WHERE email = ?';
         connection.execute(selectMaterialsSql, [req.user.email], (err, result) => {
             if (err) {
                 return res.json({ message: "Error checking user materials" });
@@ -326,7 +316,7 @@ const statusTask = async (req, res) => {
         if (status === 'done') {
             const s=`select NumofCrafterDoneTask from task where TaskName ="${TaskName}" and Project_title ="${Project_title}" `
             connection.execute(s,(err,re)=>{
-                 if(re.length==0)return res.status(400).json({massege :"You dont join to this project"})
+                if(!re.affectedRows)return res.json({ massege:"no user found" });
                 const sql = `update task set NumofCrafterDoneTask=(${re[0].NumofCrafterDoneTask} + 1 ) where TaskName ="${TaskName}" and Project_title ="${Project_title}"` 
                 connection.execute(sql, (err, result) => {
                     

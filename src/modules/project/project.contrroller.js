@@ -24,13 +24,13 @@ const addproject = async function (req, res) {
         } else if (err) {
             return res.json({ error: err });
         }
-        const { title, description, level, materials, size, comments, organizer_email, skills } = req.body;
+        const { title, description, level, materials, size, organizer_email, skills } = req.body;
         const image = req.file ? req.file.filename : null; 
       
 
-        const sql = `INSERT INTO project (title, description, level, materials, size, comments, organizer_email, skills, image_url) VALUES ("${title}",
-        "${description}", "${level}", "${materials}", "${size}", "${comments}","${organizer_email}","${skills}", "${image}")`;
-        connection.execute(sql, [title, description, level, materials, size, comments, organizer_email, skills, image], (err, result) => {
+        const sql = `INSERT INTO project (title, description, level, materials, size,  organizer_email, skills, image_url) VALUES ("${title}",
+        "${description}", "${level}", "${materials}", "${size}", "${organizer_email}","${skills}", "${image}")`;
+        connection.execute(sql, [title, description, level, materials, size,organizer_email, skills, image], (err, result) => {
             if (err) {
                 if (err.errno == 1452) {
                     return res.json({ message: "This organizer doesn't exist" });
@@ -150,7 +150,7 @@ const changeProjStatus = async function(req, res) {
     const title = req.body.title;
     let newStatus = '';
 
-    if(req.user.role === 'crafter') {
+    if(req.user.role === 'crafter' || req.user.role === 'admin') {
         return res.json("You cannot access this page");
     }
 

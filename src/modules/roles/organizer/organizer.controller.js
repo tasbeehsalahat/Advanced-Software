@@ -32,7 +32,7 @@ if (result.length==0){
                     if (error) {
                         return res.json(error);
                     }
-                    const sql2 =` UPDATE project SET EventName="${eventName}" WHERE title="${title}"`;
+                    const sql2 = `UPDATE project SET EventName="${eventName}" WHERE title="${title}"`;
                     connection1.execute(sql2, (err, result) => {
                         if (err) {
                             if (err.errno == 1062) {

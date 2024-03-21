@@ -8,10 +8,14 @@ app.use(bodyParser.json());
 
 const { JWT_SECRET_KEY } = require('./../middleware/middleware.js');
 const bcrypt = require('bcrypt');
+const { loginSchema, signupSchema } = require('./auth.validation.js');
 
 const login = async (req, res) => {
+    const { error } = loginSchema.validate(req.body);
+    if (error) {
+        return res.status(400).json({ message: error.details[0].message });
+    }
     const { email, password } = req.body;
-    
     const sql = 'SELECT * FROM users';
     
     try {
@@ -71,15 +75,14 @@ const login = async (req, res) => {
 
 const signup = async (req, res) => {
     try {
+        const { error } = signupSchema.validate(req.body);
+        if (error) {
+            return res.status(400).json({ message: error.details[0].message });
+        }
         const { UserName, skills, intrests, role, email, password,materials } = req.body;
-
-        if (!email || !email.includes('@') || !email.endsWith('.com')) {
-            return res.status(400).json({  message: 'Invalid email format' });
+        if (!req.body || Object.keys(req.body).length === 0) {
+            return res.status(400).json({ message: 'Request body is missing or empty' });
         }
-        if (!password || !password.match(/^(?=.*[a-zA-Z])(?=.*[0-9])/)) {
-            return res.status(400).json({  message: 'Password must contain both letters and numbers' });
-        }
-        // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const sql = `INSERT INTO users (email, UserName, password, skills, role, intrests,materials) VALUES (?,?, ?, ?, ?, ?, ?)`;

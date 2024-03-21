@@ -55,7 +55,7 @@ const chooseStatus = async function(req, res) {
                         return res.status(500).json({ error: err });
                     }
                     if (ress[0].NumofMem + 1 === ress[0].size) {
-                        const sql6 =` UPDATE project SET process_flow='started' WHERE title = '${project_title}'`;
+                        const sql6 = `UPDATE project SET process_flow='started' WHERE title = '${project_title}'`;
                         connection.execute(sql6);
                     }
                 });
