@@ -1,19 +1,18 @@
 const connection = require("../../../../DB/connection.js")
 const bcrypt=require("bcrypt");
+const {  addCrafterSchema } = require("../../auth/auth.validation.js");
 const addCrafter = async function(req, res){
-    const {email,UserName,password,skills,intrests,role} = req.body ;
+    const {email,UserName,password,skills,intrests,materials} = req.body ;
     const hashedPassword = await bcrypt.hash(password, 10);
     try{  
         if(req.user.role!='admin'){
             return res.status(401).json("you cannot access this page")
         }   
-        if (!email || !email.includes('@') || !email.endsWith('.com')) {
-            return res.status(400).json({  message: 'Invalid email format' });
+        const { error } = addCrafterSchema.validate(req.body);
+        if (error) {
+            return res.status(400).json({ message: error.details[0].message });
         }
-        if (!password || !password.match(/^(?=.*[a-zA-Z])(?=.*[0-9])/)) {
-            return res.status(400).json({  message: 'Password must contain both letters and numbers' });
-        }
-   const sql = `INSERT INTO users (email,UserName, password, skills, role,intrests) VALUES ('${email}', '${UserName}', '${hashedPassword}','${skills}','${role}','${intrests}') `   
+   const sql = `INSERT INTO users (email,UserName, password, skills, role,intrests,materials) VALUES ('${email}', '${UserName}', '${hashedPassword}','${skills}','crafter','${intrests}','${materials}') `   
    connection.execute(sql,(err, result) => {
        if(err) {
            if(err.errno==1062){
