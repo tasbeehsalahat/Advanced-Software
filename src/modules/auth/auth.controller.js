@@ -15,6 +15,9 @@ const login = async (req, res) => {
     if (error) {
         return res.status(400).json({ message: error.details[0].message });
     }
+    if (!req.body || Object.keys(req.body).length === 0) {
+        return res.status(400).json({ message: 'Request body is missing or empty' });
+    }
     const { email, password } = req.body;
     const sql = 'SELECT * FROM users';
     

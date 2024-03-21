@@ -1,6 +1,6 @@
 const connection = require("../../../../DB/connection.js")
 const bcrypt=require("bcrypt");
-const {  addCrafterSchema } = require("../../auth/auth.validation.js");
+const {  addCrafterSchema, createEventSchema } = require("../../auth/auth.validation.js");
 const addCrafter = async function(req, res){
     const {email,UserName,password,skills,intrests,materials} = req.body ;
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -97,27 +97,43 @@ connection.execute(sql,(err,result)=>{
 })
 
 }
-const createvent = async function(req, res) {
-    if(req.user.role !== 'admin') {
-        return res.status(401).json("You cannot access this page");
-    } 
-    const { EventName, Number, address } = req.body;
-    
+
+const createEvent = async (req, res) => {
     try {
-        const sql = `INSERT INTO events (EventName, number, address) VALUES ('${EventName}', ${Number}, '${address}')`;
-        connection.execute(sql, (err, result) => {
-            if(err) {
-                if(err.errno == 1062) {
-                    return res.status(400).json("This event already exists");
-                }
-                return res.status(500).json(err.stack);
-            }
-            return res.status(200).json("You created an event successfully!");
-        });
+        if (req.user.role !== 'admin') {
+            return res.status(401).json("You cannot access this page");
+        } 
+        
+        if (!req.body || Object.keys(req.body).length === 0) {
+            return res.status(400).json({ message: 'Request body is missing or empty' });
+        }
+        const { error } = createEventSchema.validate(req.body);
+        if (error) {
+            return res.status(400).json({ error: error.details.map(d => d.message) });
+        }
+
+        const { EventName, size, address, project_title } = req.body;
+        const checkEventExistsQuery = `SELECT COUNT(*) AS count FROM events WHERE EventName = ?`;
+        const [eventExistsRows, eventExistsFields] = await connection.execute(checkEventExistsQuery, [EventName]);
+        if (eventExistsRows[0].count > 0) {
+            return res.status(400).json({ error: 'This event already exists' });
+        }
+
+        // Check if the project title exists
+        const checkProjectExistsQuery = `SELECT COUNT(*) AS count FROM project WHERE title = ?`;
+        const [projectExistsRows, projectExistsFields] = await connection.execute(checkProjectExistsQuery, [project_title]);
+        if (projectExistsRows[0].count === 0) {
+            return res.status(400).json({ error: 'Invalid project title provided' });
+        }
+
+        // Insert the new event
+        const insertEventQuery = `INSERT INTO events (EventName, size, addressOfevent, project_title) VALUES (?, ?, ?, ?)`;
+        const [insertResult, insertFields] = await connection.execute(insertEventQuery, [EventName, size, address, project_title]);
+        
+        return res.status(200).json("You created an event successfully!");
     } catch (error) {
         return res.status(500).json(error.stack);
     }
 };
 
-
-module.exports ={ addCrafter ,getCrafter,deactivateUser,selectfeatured,createvent} ;
+module.exports ={ addCrafter ,getCrafter,deactivateUser,selectfeatured,createEvent} ;
