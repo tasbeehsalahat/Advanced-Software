@@ -83,7 +83,7 @@ const updateproject = async function(req, res){
         if (error) {
             return res.json(error);
         }
-        return res.json("Updated successfully");
+        return res.status(200).json({massege : "Updated successfully"})
     });
 }
 

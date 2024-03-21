@@ -41,7 +41,7 @@ const join = async (req, res) => {
       }
   
       if (result[0].size > result[0].NumofMem) {
-
+       
         const sql = 'INSERT INTO collaboration (user_email, project_title) VALUES (?, ?)';
         const values = [user_email, project_title];
     
@@ -165,12 +165,12 @@ const LendCenter = async (req, res) => {
     
     const { Material, Quantity, title } = req.body;
     const email = req.user.email;
-
+     
     const sql = `SELECT project_title FROM collaboration WHERE user_email='${email}'`;
 
     connection.execute(sql, (err, result) => {
         if (err) {
-            return res.json(err.stack);
+            return res.json({massege : "you are already added this material"});
         }
 
         // Check if the result array has at least one item
@@ -192,10 +192,10 @@ const LendCenter = async (req, res) => {
                 return res.json({ message: "You haven't joined this project" });
             }
         } else {
-            return res.json({ message: "You haven't joined any projects" });
+            return res.json({ message: "You haven't joined any projects or your request pendding" });
         }
     });
-};
+}
 
 const LendMaterial = async (req, res) => {
     if (req.user.role !== 'crafter') {
@@ -307,7 +307,7 @@ const chooseMaterial = async (req, res) => {
 };
 const statusTask = async (req, res) => {
     if (req.user.role !== 'crafter') {
-        return res.json("You cannot access this page");
+        return res.status(401).json("You cannot access this page");
     }
 
     const { status, TaskName, Project_title } = req.body;
@@ -319,14 +319,15 @@ const statusTask = async (req, res) => {
                 if(!re.affectedRows)return res.json({ massege:"no user found" });
                 const sql = `update task set NumofCrafterDoneTask=(${re[0].NumofCrafterDoneTask} + 1 ) where TaskName ="${TaskName}" and Project_title ="${Project_title}"` 
                 connection.execute(sql, (err, result) => {
+                    
                     if (err) {
                         console.error('Error executing the query:', err);
-                        return res.json({ error: 'Internal Server Error' });
+                        return res.status(500).json({ error: 'Internal Server Error' });
                     }
                      if(!result.affectedRows){
-                        return res.json({ massege:"no user task" });
+                        return res.status(400).json({ massege:" no tasks associated with the specified parameters" });
                      }
-                    return res.json({ message: "Good job!" });
+                    return res.status(200).json({ message: "Good job!" });
                 });
             })           
             
@@ -335,7 +336,7 @@ const statusTask = async (req, res) => {
         }
     } catch (err) {
         console.error('Error in the try-catch block:', err);
-        return res.json({ error: 'Internal Server Error' });
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
 };
 

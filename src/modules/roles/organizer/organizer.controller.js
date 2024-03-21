@@ -1,4 +1,4 @@
-const connection1 = require('../../../../DB/connection.js');
+const connection = require('../../../../DB/connection.js');
 
 const joinevent = async (req, res) => {
     if (req.user.role !== 'organizer') {
@@ -63,13 +63,19 @@ const addtasks = (req, res) => {
             return res.status(500).json(err);
         }
         if (ress.some(obj => obj.title === project_title)) {
-            const sql = `INSERT INTO task (project_title, taskName, description) VALUES ('${project_title}', '${taskName}', '${description}')`;
-            connection.execute(sql, (error, resl) => {
-                if (error) {
-                    return res.status(500).json(error);
+            const sql =` INSERT INTO task (project_title, taskName, description) VALUES ('${project_title}', '${taskName}', '${description}')`;
+            try{
+                connection.execute(sql, (error, resl) => {
+                    if (error) {
+                        return res.status(400).json({massege : " this task is already exists" });
+                    }
+                    return res.status(200).json({ message: "Added successfully" });
+                });
+            }catch(e){
+                if(e){
+                    
                 }
-                return res.status(200).json({ message: "Added successfully" });
-            });
+            }
         } else {
             return res.status(400).json({ message: "You are not an organizer for this project" });
         }

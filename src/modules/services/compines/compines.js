@@ -5,6 +5,7 @@ const app = express();
 app.use(express.json());
 
 app.post('/save-info', (req, res) => {
+ 
   const { company_name, job_title, description, skillsneeded, company_email } = req.body;
 
   // Check if all required fields are present in the request body
