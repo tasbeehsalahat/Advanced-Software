@@ -27,8 +27,8 @@ const login = async (req, res) => {
                 return res.status(500).json({ message: 'Internal Server Error' });
             }
             
-            const user = results.find(u => u.email === email && bcrypt.compare(u.password,password));
-            
+            const user = results.find(u => u.email === email && bcrypt.compare(u.password, password));
+
             if (!user) {
                 return res.status(401).json({ message: 'Invalid email or password' });
             }

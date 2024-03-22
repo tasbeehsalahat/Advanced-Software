@@ -1,6 +1,5 @@
 
 const router = require('express').Router();
-const { Router } = require('express');
 const { authenticateJWT } = require('../middleware/middleware.js');
 const {getJob,searchJobs,getItem,searchByTerm,chatGPT,finishedproject, featuredproject, showevent ,commentOnProj, getCommentsForProj} = require('./homeController.js');
 
