@@ -16,7 +16,7 @@ const signupSchema = Joi.object({
         }
         return value;
     }),
-    password: Joi.string().pattern(/^(?=.*[a-zA-Z])(?=.*[0-9])/).required(),
+    password: Joi.string().pattern(/^(?=.*[a-zA-Z])(?=.*[0-9])/).min(8).required()
 }).unknown(true);
 
 const addCrafterSchema = Joi.object({
@@ -36,7 +36,7 @@ const addProjectSchema = Joi.object({
     description: Joi.string().required(),
     level: Joi.string().required(),
     materials: Joi.string().required(),
-    size: Joi.string().required(),
+    size: Joi.number().min(5).required(),
     organizer_email: Joi.string().email().required(),
     skills: Joi.string().required(),
     image: Joi.any() // Since image is optional, we don't require it
@@ -50,7 +50,7 @@ const updateProjectSchema = Joi.object({
     description: Joi.string(),
     level: Joi.string(),
     materials: Joi.string(),
-    size: Joi.string(),
+    size: Joi.number().min(0),
     comments: Joi.string(),
     skills: Joi.string()
 }).options({ allowUnknown: true }); 
