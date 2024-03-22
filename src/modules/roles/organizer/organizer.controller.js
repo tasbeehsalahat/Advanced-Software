@@ -66,8 +66,6 @@ const joinevent = async (req, res) => {
     });
 };
 
-
-
 const addtasks = (req, res) => {
     if (req.user.role !== 'organizer') {
         return res.status(401).json("You cannot access this page");

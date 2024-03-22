@@ -142,7 +142,6 @@ const attributesNotToModify = ['id'];
 const updateproject = async function(req, res){
     try {
        
- const updateproject = async function(req, res) {
     const otherUpdates = await req.body;
     const { error, value } = updateProjectSchema.validate(req.body);
     if (error) {
@@ -192,7 +191,7 @@ const updateproject = async function(req, res){
             return res.status(200).json({ message : "Updated successfully" });
         });
     
- }}}
+ }}
      catch (err) {
         return res.status(500).json(err);
     }
