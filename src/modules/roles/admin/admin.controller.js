@@ -147,12 +147,10 @@ const createEvent = async (req, res) => {
             return res.status(401).json("You cannot access this page");
         } 
         
-        // Check if the request body is missing or empty
         if (!req.body || Object.keys(req.body).length === 0) {
             return res.status(400).json({ message: 'Request body is missing or empty' });
         }
         
-        // Validate the request body
         const { error } = createEventSchema.validate(req.body);
         if (error) {
             return res.status(400).json({ error: error.details.map(d => d.message) });
@@ -160,7 +158,6 @@ const createEvent = async (req, res) => {
 
         const { EventName, size, address } = req.body;
         
-        // Insert the new event into the database
         const sql = `INSERT INTO events (EventName, size, addressOfevent) VALUES (?, ?, ?)`;
         connection.execute(sql, [EventName, size, address], (err, result) => {
             if (err) {
