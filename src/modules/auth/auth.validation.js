@@ -64,7 +64,6 @@ const createEventSchema = Joi.object({
 const joineventSchema = Joi.object({
     title: Joi.string().required(),
     eventName: Joi.string().required(),
-    project_title:Joi.any()
 });
 
 

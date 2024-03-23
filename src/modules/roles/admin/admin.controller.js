@@ -140,43 +140,41 @@ const selectfeatured = async function (req, res) {
     }
 }
 
-
 const createEvent = async (req, res) => {
     try {
+        // Check if the user is an admin
         if (req.user.role !== 'admin') {
             return res.status(401).json("You cannot access this page");
         } 
         
+        // Check if the request body is missing or empty
         if (!req.body || Object.keys(req.body).length === 0) {
             return res.status(400).json({ message: 'Request body is missing or empty' });
         }
+        
+        // Validate the request body
         const { error } = createEventSchema.validate(req.body);
         if (error) {
             return res.status(400).json({ error: error.details.map(d => d.message) });
         }
 
-        const { EventName, size, address, project_title } = req.body;
-        const checkEventExistsQuery = `SELECT COUNT(*) AS count FROM events WHERE EventName = ?`;
-        const [eventExistsRows, eventExistsFields] = await connection.execute(checkEventExistsQuery, [EventName]);
-        if (eventExistsRows[0].count > 0) {
-            return res.status(400).json({ error: 'This event already exists' });
-        }
-
-        // Check if the project title exists
-        const checkProjectExistsQuery = `SELECT COUNT(*) AS count FROM project WHERE title = ?`;
-        const [projectExistsRows, projectExistsFields] = await connection.execute(checkProjectExistsQuery, [project_title]);
-        if (projectExistsRows[0].count === 0) {
-            return res.status(400).json({ error: 'Invalid project title provided' });
-        }
-
-        // Insert the new event
-        const insertEventQuery = `INSERT INTO events (EventName, size, addressOfevent, project_title) VALUES (?, ?, ?, ?)`;
-        const [insertResult, insertFields] = await connection.execute(insertEventQuery, [EventName, size, address, project_title]);
+        const { EventName, size, address } = req.body;
         
-        return res.status(200).json("You created an event successfully!");
+        // Insert the new event into the database
+        const sql = `INSERT INTO events (EventName, size, addressOfevent) VALUES (?, ?, ?)`;
+        connection.execute(sql, [EventName, size, address], (err, result) => {
+            if (err) {
+                if (err.errno === 1062) {
+                    return res.status(400).json("This event already exists");
+                }
+                return res.status(500).json(err.stack);
+            }
+            return res.status(200).json("You created an event successfully!");
+        });    
     } catch (error) {
         return res.status(500).json(error.stack);
     }
 };
+
 
 module.exports ={ addCrafter ,getCrafter,deactivateUser,selectfeatured,createEvent} ;
