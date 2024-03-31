@@ -72,39 +72,6 @@ catch(err){
 }
 };
 
-const shownotification = async (req, res) => {
-    try {
-        if (req.user.role !== 'crafter') {
-            return res.json("You cannot access this page");
-        }
-        const userEmail = req.user.email;
-        const sql = ` SELECT project_title, status  FROM collaboration WHERE user_email = ? `;
-
-        connection.execute(sql, [userEmail], (err, results) => {
-            if (err) {
-                return res.status(500).json(err.stack);
-            }
-            if(results.length==0){
-                return res.json({message:"no notification"})
-            }
-            // for task //
-            const sql5= `select * from task`
-            connection.execute(sql5,(erre,reu)=>{
-                
-                const matchingObjects = reu.filter(obj2 =>
-                    results.some(obj1 => obj1.project_title === obj2.Project_title)
-                  );
-            const concatenatedArray = results.concat(matchingObjects);
-            return res.json({ notification: concatenatedArray });
-            })
-            
-
-            //end task 
-        });
-    } catch (err) {
-        return res.status(500).json({ error: "Internal server error" });
-    }
-};
 //
 const match = async function (req, res) {
     try {

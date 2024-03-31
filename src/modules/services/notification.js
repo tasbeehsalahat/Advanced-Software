@@ -2,12 +2,36 @@ const connection = require("../../../DB/connection.js");
 
 const notification = async (req, res) => {
     try {
+        let sql ;
+        console.log(req.user.role )
         if (req.user.role === 'crafter') {
-            return res.json("You cannot access this page");
+            const userEmail = req.user.email;
+            const sql11 = ` SELECT project_title, status  FROM collaboration WHERE user_email = ? `;
+    
+            connection.execute(sql11, [userEmail], (err, results) => {
+                if (err) {
+                    return res.status(500).json(err.stack);
+                }
+                if(results.length==0){
+                    return res.json({message:"no notification"})
+                }
+                // for task //
+                const sql5= `select * from task`
+                connection.execute(sql5,(erre,reu)=>{
+                    
+                    const matchingObjects = reu.filter(obj2 =>
+                        results.some(obj1 => obj1.project_title === obj2.Project_title)
+                      );
+                const concatenatedArray = results.concat(matchingObjects);
+                return res.json({ notification: concatenatedArray });
+                })
+                
+    
+                //end task 
+            });
         }
-        let sql;
 
-        if (req.user.role === 'organizer') {
+        else if (req.user.role === 'organizer') {
             sql = `SELECT up.*
             FROM collaboration up
             JOIN project p ON up.project_title = p.title
@@ -16,12 +40,7 @@ const notification = async (req, res) => {
             )`;
     
            params = [req.user.email];
-        } 
-        else {
-            sql = `SELECT * FROM collaboration WHERE status='pending'` 
-        }
-
-       await connection.execute(sql, params,(err, result) => {
+           connection.execute(sql, params,(err, result) => {
             if (err) {
                 return res.json(err);
             }
@@ -31,6 +50,20 @@ const notification = async (req, res) => {
                 return res.json({ notification: result });
             }
         });
+        } 
+        else {
+            sql = `SELECT * FROM collaboration WHERE status='pending'` 
+            connection.execute(sql, params,(err, result) => {
+                if (err) {
+                    return res.json(err);
+                }
+               else if (result.length === 0) {
+                    return res.json({ notification: "No join request" });
+                } else {
+                    return res.json({ notification: result });
+                }
+            });
+        }
     } catch (err) {
         return res.json(err.stack);
     }

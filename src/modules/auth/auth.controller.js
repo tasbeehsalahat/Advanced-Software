@@ -8,7 +8,7 @@ app.use(bodyParser.json());
 
 const { JWT_SECRET_KEY } = require('./../middleware/middleware.js');
 const bcrypt = require('bcrypt');
-const { loginSchema, signupSchema } = require('../services/validation/validation.js');
+const { loginSchema, signupSchema } = require('./../services/validation/validation.js');
 
 const login = async (req, res) => {
     const { error } = loginSchema.validate(req.body);
@@ -27,59 +27,49 @@ const login = async (req, res) => {
                 return res.status(500).json({ message: 'Internal Server Error' });
             }
             
-            const user = results.find(u => u.email === email);
-            if (user) {
-                bcrypt.compare(password, user.password, (err, result) => {
-                    if (err) {
-                        return res.json({err})
-                    } else if (result) {
-                        // Passwords match, proceed with authentication
-                        if (user.status === 'deactivated') {
-                            return res.status(403).json({ message: 'Account is deactivated' });
-                          }
-            
-                        const token = jwt.sign({ email: user.email, role: user.role }, JWT_SECRET_KEY, { expiresIn: '1h' });
-                
-                        const sql2 = `SELECT email_user FROM tokens WHERE email_user = "${email}"`;
-                        connection.execute(sql2, [email], (err, results) => {
-                            console.log(results);
-                            if (err) {
-                                return res.status(500).json({ message: 'Internal Server Error' });
-                            }
-            
-                            if (results && results.length > 0) {
-                                connection.execute(`UPDATE tokens SET token = ? WHERE email_user = ?`, [token, email], (err, result) => {
-                                    if (err) {
-                                        return res.json({ message: "Error" });
-                                    }
-                                    return res.status(200).json({ message: 'Welcome back', token });
-                                });
-                            } else {
-                                switch (user.role) {
-                                    case 'admin':
-                                    case 'crafter':
-                                    case 'organizer':
-                                        connection.execute(`INSERT INTO tokens (email_user, token) VALUES (?, ?)`, [email, token], (err, result) => {
-                                            if (err) {
-                                                return res.status(400).json({ message: "Error" });
-                                            }
-                                            return res.status(200).json({ message: `Welcome to the ${user.role} page`, token });
-                                        });
-                                        break;
-                                    default:
-                                        return res.status(400).json({ message: 'Unknown role' });
+            const user = results.find(u => u.email === email && bcrypt.compare(u.password, password));
+
+            if (!user) {
+                return res.status(401).json({ message: 'Invalid email or password' });
+            }
+            if (user.status === 'deactivated') {
+                return res.status(403).json({ message: 'Account is deactivated' });
+              }
+
+            const token = jwt.sign({ email: user.email, role: user.role }, JWT_SECRET_KEY, { expiresIn: '1h' });
+    
+            const sql2 = `SELECT email_user FROM tokens WHERE email_user = "${email}"`;
+            connection.execute(sql2, [email], (err, results) => {
+                console.log(results);
+                if (err) {
+                    return res.status(500).json({ message: 'Internal Server Error' });
+                }
+
+                if (results && results.length > 0) {
+                    connection.execute(`UPDATE tokens SET token = ? WHERE email_user = ?`, [token, email], (err, result) => {
+                        if (err) {
+                            return res.json({ message: "Error" });
+                        }
+                        return res.status(200).json({ message: 'Welcome back', token });
+                    });
+                } else {
+                    switch (user.role) {
+                        case 'admin':
+                        case 'crafter':
+                        case 'organizer':
+                            connection.execute(`INSERT INTO tokens (email_user, token) VALUES (?, ?)`, [email, token], (err, result) => {
+                                if (err) {
+                                    return res.status(400).json({ message: "Error" });
                                 }
-                            }
-                        });
-                    
-                    } else {
-                        return res.json({massege : "incorrect password"})
+                                return res.status(200).json({ message: `Welcome to the ${user.role} page`, token });
+                            });
+                            break;
+                        default:
+                            return res.status(400).json({ message: 'Unknown role' });
                     }
-                });
-            } else { 
-                return res.json({massege : "NO user found"})
-        }})
-        
+                }
+            });
+        });
     } catch (err) {
         return res.status(500).json({ error: err.stack });
     }
