@@ -13,8 +13,8 @@ app.post('/send-email',  async function (req, res) {
     try{
         
     await sendMaill(email); 
-    console.log(codeSentToEmail);
-    return res.status(200).json({ message: 'Email sent successfully' });
+    console.log(email);
+    return res.status(200).json({ message: 'sent successfully' });
     }catch(err){
         return res.status(500).json({ message:err})
     }

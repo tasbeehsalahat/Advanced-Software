@@ -11,6 +11,8 @@ const password = require('./src/modules/services/password/password.js');
 const notfoundpage = require('./src/modules/notfoundpage/notfoundpage.js');
 const Collaborations=require('./src/modules/Collaborations/collab.js')
 const HomePage=require('./src/modules/HomePage/home.js')
+const dotenv = require('dotenv')
+dotenv.config()
 app.use(express.json())
 app.use('/admin',admin)
 app.use('/auth',auth)
@@ -24,6 +26,6 @@ app.use('/upload', express.static('upload'));
 app.use('/collaborations',Collaborations)
 app.use('/Home',HomePage)
 app.use('*', notfoundpage)
-app.listen(3000,() => {
+app.listen(process.env.PORT,() => {
     console.log('listening on 3000');
 });

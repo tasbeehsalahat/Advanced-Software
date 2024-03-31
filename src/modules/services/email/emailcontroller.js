@@ -13,8 +13,8 @@ const generateRandomString = (length) => {
 const transporter = nodemailer.createTransport({
     service: 'Gmail',
     auth: {
-        user: 'shahadjawabreh3@gmail.com',  
-        pass: 'vptb poko wows hmtn'           
+        user: `${process.env.EMAIL}`,  
+        pass:`${process.env.PASSWORD}`           
     }
 });
 
