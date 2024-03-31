@@ -2,7 +2,7 @@ const express = require('express');
 const connection = require("../../../DB/connection.js");
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
-const app = express(); // Creating an instance of Express application
+const app = express(); 
 
 app.use(bodyParser.json());
 
@@ -109,14 +109,12 @@ const signup = async (req, res) => {
 const logout = async (req, res) => {
     try {
       const token = req.header('Authorization'); 
-  console.log(token)
       const sql = `DELETE FROM tokens WHERE token = "${token}"`;
       connection.execute(sql, [token], (error, results, fields) => {
         if (error) {
           console.error(error);
           return res.status(500).json({ error: 'An error occurred while logging out' });
         }
-        console.log('Token removed from the database');
       });
   
      return res.status(200).json( {
