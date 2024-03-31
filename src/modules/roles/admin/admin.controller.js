@@ -1,6 +1,6 @@
 const connection = require("../../../../DB/connection.js")
 const bcrypt=require("bcrypt");
-const {  addCrafterSchema, createEventSchema } = require('./../../validation/validation.js');
+const {  addCrafterSchema, createEventSchema } = require('../../services/validation/validation.js');
 const addCrafter = async function(req, res) {
     try {
         const { email, UserName, password, skills, intrests, materials } = req.body;
