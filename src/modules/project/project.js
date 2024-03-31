@@ -1,9 +1,10 @@
-const {addproject,deleteproject,updateproject,getproject} = require('./project.contrroller.js');
+const { authenticateJWT } = require('../middleware/middleware.js');
+const {addproject,deleteproject,updateproject,getproject,changeProjStatus} = require('./project.contrroller.js');
 const router = require('express').Router();
 
-router.post('/projects', addproject);
-router.delete('/project', deleteproject);
-router.put('/project', updateproject);
-router.get('/project', getproject);
-
+router.post('/project',authenticateJWT, addproject);
+router.delete('/project', authenticateJWT,deleteproject);
+router.patch('/project', authenticateJWT,updateproject);
+router.get('/project',authenticateJWT, getproject);
+router.patch('/ProjStatus',authenticateJWT,changeProjStatus)
 module.exports = router;
