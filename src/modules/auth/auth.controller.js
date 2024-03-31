@@ -8,7 +8,7 @@ app.use(bodyParser.json());
 
 const { JWT_SECRET_KEY } = require('./../middleware/middleware.js');
 const bcrypt = require('bcrypt');
-const { loginSchema, signupSchema } = require('./auth.validation.js');
+const { loginSchema, signupSchema } = require('./../validation/validation.js');
 
 const login = async (req, res) => {
     const { error } = loginSchema.validate(req.body);
