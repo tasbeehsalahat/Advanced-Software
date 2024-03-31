@@ -15,6 +15,9 @@ const login = async (req, res) => {
     if (error) {
         return res.status(400).json({ message: error.details[0].message });
     }
+    if (!req.body || Object.keys(req.body).length === 0) {
+        return res.status(400).json({ message: 'Request body is missing or empty' });
+    }
     const { email, password } = req.body;
     const sql = 'SELECT * FROM users';
     
@@ -24,8 +27,8 @@ const login = async (req, res) => {
                 return res.status(500).json({ message: 'Internal Server Error' });
             }
             
-            const user = results.find(u => u.email === email && bcrypt.compare(u.password,password));
-            
+            const user = results.find(u => u.email === email && bcrypt.compare(u.password, password));
+
             if (!user) {
                 return res.status(401).json({ message: 'Invalid email or password' });
             }

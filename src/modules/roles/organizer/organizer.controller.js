@@ -1,54 +1,72 @@
 const connection = require('../../../../DB/connection.js');
-
+const { joineventSchema } = require('../../auth/auth.validation.js');
 const joinevent = async (req, res) => {
-    if (req.user.role !== 'organizer') {
-        return res.status(401).json("You can't access this page");
-    }
-    const org = req.user.email;
-    const { title, eventName } = req.body;
-    const sql = `SELECT process_flow FROM project WHERE title="${title}" AND organizer_email="${org}"`;
-
-    connection1.execute(sql, (err, result) => {
-        if (err) {
-            return res.json(err);
+    try {
+        if (req.user.role !== 'organizer') {
+            return res.status(401).json({ message: "You can't access this page" });
         }
-if (result.length==0){
-    return res.status(400).json ("invalid input")
-}
-        if (result[0].process_flow !== 'finished') {
-            return res.json({ message: "You can't join the event because your project hasn't finished yet!" });
-        } 
-        else {
-            const sql1 = `SELECT number FROM events WHERE EventName="${eventName}"`;
-            connection1.execute(sql1, (erro, resl) => {
-                if (erro) {
-                    return res.status(401).json(erro);
+
+        if (!req.body || Object.keys(req.body).length === 0) {
+            return res.status(400).json({ message: 'Request body is missing or empty' });
+        }
+
+        const { error } = joineventSchema.validate(req.body);
+        if (error) {
+            return res.status(400).json({ error: error.details.map(d => d.message) });
+        }
+
+        const { title, eventName } = req.body;
+        const user = req.user.email;
+
+        const checkProjectQuery = `SELECT process_flow FROM project WHERE title = ? AND organizer_email = ?`;
+        connection.execute(checkProjectQuery, [title, user], (projectErr, projectResult) => {
+            if (projectErr) {
+                return res.status(500).json({ error: projectErr.message });
+            }
+            if (projectResult.length === 0) {
+                return res.status(400).json({ message: "You don't own this project" });
+            }
+            if (projectResult[0].process_flow !== 'finished') {
+                return res.status(400).json({ message: "You can't join the event because your project hasn't finished yet!" });
+            }
+
+            const checkEventQuery = `SELECT size FROM events WHERE EventName = ?`;
+            connection.execute(checkEventQuery, [eventName], (eventErr, eventResult) => {
+                if (eventErr) {
+                    return res.status(500).json({ error: eventErr.message });
                 }
-                if (resl.length === 0 || resl[0].number === 0) {
-                    return res.status(403).json("The places are full!!! SORRY");
+                if (eventResult.length === 0) {
+                    return res.status(404).json({ message: "The event does not exist" });
                 }
-                const s = `UPDATE events SET number = number - 1 WHERE EventName="${eventName}"`;
-                connection1.execute(s, (error, ress) => {
-                    if (error) {
-                        return res.json(error);
+                if (eventResult[0].size === 0) {
+                    return res.status(403).json({ message: "The places are full! Sorry" });
+                }
+
+                
+                const updateEventQuery = `UPDATE events SET size = size - 1 WHERE EventName = ?`;
+                connection.execute(updateEventQuery, [eventName], (updateErr, updateResult) => {
+                    if (updateErr) {
+                        return res.status(500).json({ error: updateErr.message });
                     }
-                    const sql2 = `UPDATE project SET EventName="${eventName}" WHERE title="${title}"`;
-                    connection1.execute(sql2, (err, result) => {
-                        if (err) {
-                            if (err.errno == 1062) {
-                                return res.status(409).json("You joined it already");
+
+                    const updateProjectQuery = `UPDATE project SET EventName = ? WHERE title = ?`;
+                    connection.execute(updateProjectQuery, [eventName, title], (updateProjectErr, updateProjectResult) => {
+                        if (updateProjectErr) {
+                            if (updateProjectErr.errno === 1062) {
+                                return res.status(409).json({ message: "You have already joined this event" });
                             } else {
-                                return res.json(err);
+                                return res.status(500).json({ error: updateProjectErr.message });
                             }
                         }
-                        return res.status(200).json("You joined the event successfully");
+                        return res.status(200).json({ message: "You joined the event successfully" });
                     });
                 });
             });
-        }
-    });
+        });
+    } catch (error) {
+        return res.status(500).json({ error: error.stack });
+    }
 };
-
 
 const addtasks = (req, res) => {
     if (req.user.role !== 'organizer') {

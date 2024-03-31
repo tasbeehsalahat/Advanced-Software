@@ -150,7 +150,7 @@ const finishedproject = async (req,res)=>{
     });
   };
   const showevent = async (req, res) => {
-    const sql = `SELECT EventName, address FROM events`;
+    const sql = `SELECT EventName, addressOfevent FROM events`;
     try {
         connection1.execute(sql, (err, result) => {
             if (err) {

@@ -1,5 +1,5 @@
 const express = require('express');
-const {addCrafter,getCrafter,deactivateUser, selectfeatured, createvent} = require('./admin.controller.js');
+const {addCrafter,getCrafter,deactivateUser, selectfeatured,  createEvent} = require('./admin.controller.js');
 const {notification,chooseStatus} = require('../../services/notification.js');
 const { updateuser } = require('../users/user.controller.js');
 const { authenticateJWT } = require('../../middleware/middleware.js');
@@ -11,6 +11,6 @@ app.put('/status',authenticateJWT,deactivateUser);
 app.get('/notification',authenticateJWT,notification);
 app.post('/chooseStatus',authenticateJWT,chooseStatus);
 app.post('/selectfeatured',authenticateJWT,selectfeatured);
-app.post('/createvent',authenticateJWT,createvent)
-module.exports= app ;
+app.post('/createvent',authenticateJWT,createEvent)
+module.exports= app 
 ////////////////////////////////

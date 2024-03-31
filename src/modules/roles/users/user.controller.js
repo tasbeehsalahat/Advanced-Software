@@ -7,7 +7,8 @@ const updateuser = async (request, response) => {
 
     if (request.user.role === 'organizer') {
         return response.status(401).json("You cannot access this page");
-    } else if (request.user.role === 'crafter') {
+    }
+     else if (request.user.role === 'crafter') {
         const sql = `UPDATE users SET ${Object.entries(otherUpdates).map(([key, value]) => `${key} = "${value}"`).join(', ')} WHERE email = '${request.user.email}';`;
         connection.execute(sql,  (error, results) => {
             if (error) {
