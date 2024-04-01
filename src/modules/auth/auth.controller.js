@@ -20,27 +20,26 @@ const login = async (req, res) => {
     }
     const { email, password } = req.body;
     const sql = 'SELECT * FROM users';
-    
+
     try {
-        connection.execute(sql,async (err, results) => {
+        connection.execute(sql, async (err, results) => {
             if (err) {
                 return res.status(500).json({ message: 'Internal Server Error' });
             }
-            
-            const user = results.find(u => u.email === email && bcrypt.compare(u.password, password));
 
-            if (!user) {
+            const user = results.find(u => u.email === email);
+
+            if (!user || !(await bcrypt.compare(password, user.password))) {
                 return res.status(401).json({ message: 'Invalid email or password' });
             }
             if (user.status === 'deactivated') {
                 return res.status(403).json({ message: 'Account is deactivated' });
-              }
+            }
 
             const token = jwt.sign({ email: user.email, role: user.role }, JWT_SECRET_KEY, { expiresIn: '1h' });
-    
-            const sql2 = `SELECT email_user FROM tokens WHERE email_user = "${email}"`;
+
+            const sql2 = `SELECT email_user FROM tokens WHERE email_user = ?`;
             connection.execute(sql2, [email], (err, results) => {
-                console.log(results);
                 if (err) {
                     return res.status(500).json({ message: 'Internal Server Error' });
                 }
@@ -48,7 +47,7 @@ const login = async (req, res) => {
                 if (results && results.length > 0) {
                     connection.execute(`UPDATE tokens SET token = ? WHERE email_user = ?`, [token, email], (err, result) => {
                         if (err) {
-                            return res.json({ message: "Error" });
+                            return res.status(500).json({ message: 'Internal Server Error' });
                         }
                         return res.status(200).json({ message: 'Welcome back', token });
                     });
@@ -59,7 +58,7 @@ const login = async (req, res) => {
                         case 'organizer':
                             connection.execute(`INSERT INTO tokens (email_user, token) VALUES (?, ?)`, [email, token], (err, result) => {
                                 if (err) {
-                                    return res.status(400).json({ message: "Error" });
+                                    return res.status(500).json({ message: 'Internal Server Error' });
                                 }
                                 return res.status(200).json({ message: `Welcome to the ${user.role} page`, token });
                             });
@@ -74,6 +73,7 @@ const login = async (req, res) => {
         return res.status(500).json({ error: err.stack });
     }
 };
+
 
 
 const signup = async (req, res) => {
