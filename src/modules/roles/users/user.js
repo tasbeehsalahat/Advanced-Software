@@ -1,10 +1,11 @@
-const { updateuser , join ,shownotification,match,informations,LendMaterial, LendCenter,chooseMaterial,statusTask} = require('./user.controller.js');
+const { updateuser , join ,match,informations,LendMaterial, LendCenter,chooseMaterial,statusTask} = require('./user.controller.js');
+const {notification} = require('./../../services/notification.js')
 const router = require('express').Router();
 const { authenticateJWT } = require('../../middleware/middleware.js');
 const { filter } = require('../../services/filter.js');
 router.patch('/:email', authenticateJWT,updateuser);//if i want to change a spacific thing
 router.post('/project',authenticateJWT,join);
-router.get('/notification',authenticateJWT,shownotification);
+router.get('/notification',authenticateJWT,notification);
 router.get('/filter',filter);
 router.get('/matchingcrafter',authenticateJWT,match);
 router.get('/profile/:useremail',informations);
