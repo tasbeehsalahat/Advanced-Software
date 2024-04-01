@@ -8,7 +8,6 @@ app.post('/save-info', (req, res) => {
  
   const { company_name, job_title, description, skillsneeded, company_email } = req.body;
 
-  // Check if all required fields are present in the request body
   if (!company_name || !job_title || !description || !skillsneeded || !company_email) {
     return res.status(400).json({ message: 'Missing required fields.' });
   }

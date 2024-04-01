@@ -9,12 +9,9 @@ function addMessageToCollaboration(collaborationId, message) {
 }
 
 function getMessagesForCollaboration(collaborationId) {
-    // Check if messages exist for the collaborationId
     if (collaborationArrays[collaborationId]) {
-        // Return the array of messages for the collaboration
         return collaborationArrays[collaborationId];
     } else {
-        // If no messages found for the collaboration, return an empty array
         return "empty chat";
     }
 }

@@ -4,7 +4,6 @@ const { updateUserPasswordByEmail } = require('./passwordcontroller');
 const app = express();
 app.use(express.json()); // Parse JSON request bodies
 
-// Define route to reset password
 app.post('/reset-password', (req, res) => {
     const { email, newPassword } = req.body;
     if (!newPassword || !newPassword.match(/^(?=.*[a-zA-Z])(?=.*[0-9])/)) {
@@ -16,7 +15,6 @@ app.post('/reset-password', (req, res) => {
             return res.status(500).json({ message: 'An error occurred while updating the password.' });
         }
    
-        // Check if the password was successfully updated
         if (result.affectedRows > 0) {
             res.status(200).json({ message: 'Password changed successfully.' });
         } else {
