@@ -308,4 +308,4 @@ const statusTask = async (req, res) => {
     }
 };
 
-module.exports = {statusTask,updateuser,join,shownotification,match,informations,LendCenter,LendMaterial,chooseMaterial} ;
+module.exports = {statusTask,updateuser,join,match,informations,LendCenter,LendMaterial,chooseMaterial} ;
