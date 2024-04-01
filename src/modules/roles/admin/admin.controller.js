@@ -14,7 +14,9 @@ const addCrafter = async function(req, res) {
         if (error) {
             return res.status(400).json({ message: error.details[0].message });
         }
-
+        if (!email || !UserName || !hashedPassword || !skills || !intrests || !materials) {
+            return res.status(400).json({ message: 'Missing required parameters' });
+        }
         const sql = `INSERT INTO users (email, UserName, password, skills, role, intrests, materials) VALUES (?, ?, ?, ?, 'crafter', ?, ?)`;
         connection.execute(sql, [email, UserName, hashedPassword, skills, intrests, materials], (err, result) => {
             if (err) {

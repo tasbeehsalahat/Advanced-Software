@@ -11,10 +11,10 @@ const generateRandomString = (length) => {
 };
  async function sendMaill(receiver){
 const transporter = nodemailer.createTransport({
-    service: 'Gmail',
+    service: 'gmail',
     auth: {
-        user: `${process.env.EMAIL}`,  
-        pass:`${process.env.PASSWORD}`           
+        user: process.env.EMAIL ,  
+        pass: process.env.PASSWORD           
     }
 });
 
