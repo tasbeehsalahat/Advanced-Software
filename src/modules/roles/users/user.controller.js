@@ -1,6 +1,5 @@
 const connection = require('../../../../DB/connection');
 const bcrypt = require('bcrypt');
-
 const updateuser = async (request, response) => {
     const {...otherUpdates} = request.body;
     const userEmail = request.params.email; // Correctly access email from request parameters
@@ -92,9 +91,9 @@ const match = async function (req, res) {
             const userskills = rlt[0].skills;
             const intrests = rlt[0].intrests;
 
-            const sql2 = `SELECT email, skills FROM users WHERE skills = ? or intrests = ? AND email != ? AND role!="organizer"`;
+            const sql2 = `SELECT email, skills FROM users WHERE skills ='${userskills}'  or intrests = '${intrests}' AND email !='${email}'  AND role!="organizer"`;
 
-            connection.execute(sql2, [userskills, intrests, email], (err, results) => {
+            connection.execute(sql2,(err, results) => {
                 if (err) {
                     console.log("Error executing SQL query:", err);
                     return res.status(500).json({ error: "Database error" });
@@ -219,8 +218,8 @@ const chooseMaterial = async (req, res) => {
         const { material, email } = req.body;
 
         // Check if the user already has the material
-        const selectMaterialsSql = 'SELECT materials FROM users WHERE email = ?';
-        connection.execute(selectMaterialsSql, [req.user.email], (err, result) => {
+        const selectMaterialsSql = `SELECT materials FROM users WHERE email = '${req.user.email}'`;
+        connection.execute(selectMaterialsSql, (err, result) => {
             if (err) {
                 return res.json({ message: "Error checking user materials" });
             }
@@ -233,8 +232,8 @@ const chooseMaterial = async (req, res) => {
                 // Update user materials
                 arrMat.push(material);
                 const resultString = arrMat.join(',');
-                const updateMaterialsSql = 'UPDATE users SET materials = ? WHERE email = ?';
-                connection.execute(updateMaterialsSql, [resultString, req.user.email], (err) => {
+                const updateMaterialsSql = `UPDATE users SET materials = '${resultString}' WHERE email = '${req.user.email}'`;
+                connection.execute(updateMaterialsSql,  (err) => {
                     if (err) {
                         return res.json({ message: "Error updating user materials" });
                     }
@@ -247,15 +246,15 @@ const chooseMaterial = async (req, res) => {
                         }
 
                         // Check if the material quantity is now 0 and delete if necessary
-                        const selectQuantitySql = 'SELECT Quantity FROM material WHERE Crafte_email = ? and NameOfMaterial = ?';
-                        connection.execute(selectQuantitySql, [email, material], (err, re) => {
+                        const selectQuantitySql = `SELECT Quantity FROM material WHERE Crafte_email ='${email}' and NameOfMaterial =' ${material}'`;
+                        connection.execute(selectQuantitySql,(err, re) => {
                             if (err) {
                                 return res.json({ message: "Error checking material quantity" });
                             }
 
                             if (re[0].Quantity === 0) {
-                                const deleteMaterialSql = 'DELETE FROM material WHERE Crafte_email = ? and NameOfMaterial = ?';
-                                connection.execute(deleteMaterialSql, [email, material], (err) => {
+                                const deleteMaterialSql = `DELETE FROM material WHERE Crafte_email ='${email}' and NameOfMaterial =' ${material}'`;
+                                connection.execute(deleteMaterialSql, (err) => {
                                     if (err) {
                                         return res.json({ message: "Error deleting material" });
                                     }

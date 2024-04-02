@@ -1,5 +1,6 @@
 const connection = require('../../../../DB/connection.js');
 const { joineventSchema } = require('../../services/validation/validation.js');
+
 const joinevent = async (req, res) => {
     try {
         if (req.user.role !== 'organizer') {
