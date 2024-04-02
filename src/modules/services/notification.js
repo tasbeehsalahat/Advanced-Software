@@ -2,6 +2,8 @@ const connection = require("../../../DB/connection.js");
 
 const notification = async (req, res) => {
     try {
+        params = [req.user.email];
+
         let sql ;
         console.log(req.user.role )
         if (req.user.role === 'crafter') {
@@ -74,6 +76,12 @@ const chooseStatus = async function(req, res) {
             return res.status(401).json("You cannot access this page");
         }
         const { user_email, project_title, status } = req.body;
+        
+        // Add if statement to check if status is not 'pending'
+        if (status !== 'pending') {
+            return res.status(400).json({ message: "Status should be 'pending'" });
+        }
+
         const sql3 = `UPDATE collaboration SET status='${status}' WHERE user_email="${user_email}"`;
 
         connection.execute(sql3, (error, result) => {
@@ -82,11 +90,11 @@ const chooseStatus = async function(req, res) {
             }
             if (status === 'accept') {
                 const sql5 = `SELECT NumofMem, size FROM project WHERE title ='${project_title}'`;
-
                 connection.execute(sql5, (err, ress) => {
                     if (err) {
                         return res.status(500).json({ error: err });
                     }
+
                     if (ress[0].NumofMem + 1 === ress[0].size) {
                         const sql6 = `UPDATE project SET process_flow='started' WHERE title = '${project_title}'`;
                         connection.execute(sql6);
@@ -100,6 +108,7 @@ const chooseStatus = async function(req, res) {
     } catch (error) {
         return res.status(500).json(error.stack);
     }
-};
+}; 
+
 
 module.exports = {notification,chooseStatus};

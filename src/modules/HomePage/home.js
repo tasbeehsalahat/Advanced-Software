@@ -7,7 +7,7 @@ router.post('/search',authenticateJWT,searchByTerm);
 router.post('/chatGPT',authenticateJWT,chatGPT);
 router.get('/getItem',authenticateJWT, getItem);
 router.get('/finishedproject',finishedproject);
-router.post('/featuredproject',featuredproject);
+router.get('/featuredproject',featuredproject);
 router.get('/showevents',showevent)
 router.post('/comment',authenticateJWT,commentOnProj);
 router.get('/showComments',getCommentsForProj)

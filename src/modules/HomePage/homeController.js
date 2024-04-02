@@ -140,7 +140,7 @@ const finishedproject = async (req,res)=>{
   
   }
   const featuredproject = async (req, res) => {
-    const sql = `SELECT organizer_email, title, description, CONCAT("http://", ?, "/upload/images/", image_url) AS image_url FROM project WHERE featured IS NOT NULL ORDER BY featured DESC`;
+    const sql = `SELECT organizer_email, title, description, CONCAT("http://", ?, "/upload/images/", image_url) AS image_url FROM project WHERE rating IS NOT NULL ORDER BY rating DESC`;
     
     connection1.execute(sql, [req.hostname], (err, result) => {
       if (err) {
