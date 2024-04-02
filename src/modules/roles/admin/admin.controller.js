@@ -15,18 +15,26 @@ const addCrafter = async function(req, res) {
             return res.status(400).json({ message: error.details[0].message });
         }
 
+        // Ensure all parameters are defined before executing the SQL query
+        if (!email || !UserName || !hashedPassword || !skills || !intrests || !materials) {
+            return res.status(400).json({ message: 'Missing required parameters' });
+        }
+
         const sql = `INSERT INTO users (email, UserName, password, skills, role, intrests, materials) VALUES (?, ?, ?, ?, 'crafter', ?, ?)`;
-        connection.execute(sql, [email, UserName, hashedPassword, skills, intrests, materials], (err, result) => {
+
+        // Pass null for undefined parameters to avoid the error
+        connection.execute(sql, [email, UserName, hashedPassword, skills, intrests, materials].map(param => param || null), (err, result) => {
             if (err) {
                 if (err.errno == 1062) {
-                    return res.json("This email is already exist");
+                    return res.status(400).json("This email is already exist");
                 }
                 return res.status(500).json({ error: 'Unable to add crafter' });
             }
             return res.status(200).json("Added successfully");
         });
     } catch (err) {
-        return res.json(err);
+        console.error("Error in addCrafter function:", err);
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
 }
 
@@ -37,9 +45,7 @@ const getCrafter = function(req, res) {
         }
         if (req.user.role == 'organizer') {
             const org = req.user.email;
-        
-            // Select project_title and user_email from collaboration where project title from projects = project_title and has the same email of organizer
-            const sql1 = `SELECT c.project_title, c.user_email FROM collaboration c 
+                    const sql1 = `SELECT c.project_title, c.user_email FROM collaboration c 
                           JOIN project p ON c.project_title = p.title 
                           WHERE p.organizer_email = ?`;
         
