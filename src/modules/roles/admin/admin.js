@@ -7,7 +7,7 @@ const { personalInformation } = require('../../services/personalInformation.js')
 const app = express();
 app.post('/crafter',authenticateJWT,addCrafter);
 app.get('/crafters',authenticateJWT,getCrafter); 
-app.patch('/:email',authenticateJWT,updateuser); //update user 
+app.patch('/:email',authenticateJWT,updateuser);  
 app.put('/status',authenticateJWT,deactivateUser);
 app.get('/notification',authenticateJWT,notification);
 app.post('/chooseStatus',authenticateJWT,chooseStatus);
@@ -16,4 +16,3 @@ app.post('/selectfeatured',authenticateJWT,selectfeatured);
 app.post('/createvent',authenticateJWT,createEvent);
 
 module.exports= app 
-////////////////////////////////

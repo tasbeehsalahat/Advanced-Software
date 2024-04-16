@@ -25,8 +25,14 @@ const addproject = async function (req, res) {
         } else if (err) {
             return res.json({ error: err });
         }
-        const { title, description, level, materials, size, organizer_email, skills } = req.body;
-        const image = req.file ? req.file.filename : null; 
+        const title = req.body.title ;
+        const description = req.body.description || null;
+        const level = req.body.level || null;
+        const materials = req.body.materials || null;
+        const size = req.body.size || null;
+        const organizer_email = req.body.organizer_email || null;
+        const skills = req.body.skills || null;
+        const image = req.file ? req.file.filename : null;
       
 
         const sql = `INSERT INTO project (title, description, level, materials, size,  organizer_email, skills, image_url) VALUES ("${title}",
@@ -63,7 +69,7 @@ const addproject = async function (req, res) {
                 }
 
                 const count = results[0].count;
-                if (count > 0) {
+                if (count != 0) {
                     return res.status(409).json({ error: "Project with the same title already exists" });
                 }
 

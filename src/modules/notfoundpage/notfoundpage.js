@@ -1,5 +1,5 @@
-const notfoundpage = function(req,res){
-    return res.json({massege : "this page not found"})
-}
+const notfoundpage = function(req, res) {
+    return res.status(404).json({ message: "This page not found" });
+};
 
 module.exports = notfoundpage ;

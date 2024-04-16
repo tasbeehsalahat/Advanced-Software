@@ -45,9 +45,11 @@ const getCrafter = function(req, res) {
         }
         if (req.user.role == 'organizer') {
             const org = req.user.email;
-                    const sql1 = `SELECT c.project_title, c.user_email FROM collaboration c 
-                          JOIN project p ON c.project_title = p.title 
-                          WHERE p.organizer_email = ?`;
+            const sql1 = `SELECT c.project_title, c.user_email 
+            FROM collaboration c 
+            JOIN project p ON c.project_title = p.title 
+            WHERE p.organizer_email = ? 
+            AND c.status = 'accept'`;
         
             connection.execute(sql1, [org], (error, results) => {
                 if (error) {
@@ -58,7 +60,6 @@ const getCrafter = function(req, res) {
                     return res.json("No one has joined your project");
                 }
                 
-                // Extract the project titles and user emails from the results
                 const projectDetails = results.map(result => ({ project_title: result.project_title, user_email: result.user_email }));
                 return res.status(200).json({ projectDetails });
             });
@@ -115,40 +116,47 @@ const deactivateUser = async function(request, response) {
     }
 }
 
-
 const selectfeatured = async function (req, res) {
     try {
         if (req.user.role !== 'admin') {
-            return res.json("You cannot access this page");
+            return res.status(403).json({ message: "Forbidden: You cannot access this page" });
         }
         
         const { title, rating } = req.body;
 
-        const sql = `SELECT process_flow FROM project WHERE title="${title}"`;
-        connection.execute(sql, (err, result) => {
+        // Validation
+        if (!title || !rating) {
+            return res.status(400).json({ message: " Title and rating are required" });
+        }
+
+        const sqlSelect = `SELECT process_flow FROM project WHERE title=?`;
+        connection.execute(sqlSelect, [title], (err, result) => {
             if (err) {
-                return res.json(err);
+                return res.status(500).json({ message: "Internal Server Error", error: err.message });
             }
-            if (result[0] !== "finished") {
-                return res.status(400).json({ message: 'This project has not finished yet' });
+            if (result.length === 0 || result[0].process_flow !== "finished") {
+                return res.status(400).json({ message: ' This project has not finished yet or does not exist' });
             } else {
-                const sql2 = `UPDATE project SET rating=${rating} WHERE title="${title}"`;
-                connection.execute(sql2, (error, result) => {
+                // SQL Query Execution (2nd Query) with Parameterized Query
+                const sqlUpdate = `UPDATE project SET rating=? WHERE title=?`;
+                connection.execute(sqlUpdate, [rating, title], (error, updateResult) => {
                     if (error) {
-                        return res.json(error.stack);
+                        return res.status(500).json({ message: "Internal Server Error", error: error.message });
                     }
-                    return res.json({ message: 'You have successfully marked this project' });
+                    if (updateResult.affectedRows === 0) {
+                        return res.status(404).json({ message: ' Project with provided title not found' });
+                    }
+                    return res.status(200).json({ message: ' Project rating updated successfully' });
                 });
             }
         });
     } catch (error) {
-        return res.json(error.stack);
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 }
 
 const createEvent = async (req, res) => {
     try {
-        // Check if the user is an admin
         if (req.user.role !== 'admin') {
             return res.status(401).json("You cannot access this page");
         } 

@@ -102,11 +102,8 @@ function getItem(req, res) {
   }
 
   function chatGPT(req, res) {
-    // Request body containing the data to be sent
     const requestBody = req.body;
      
-
-  // Options for the external API call
   const options = {
       method: 'POST',
       url: 'https://chatgpt-api8.p.rapidapi.com/',
@@ -129,18 +126,24 @@ function getItem(req, res) {
       }
   });
 }
-const finishedproject = async (req,res)=>{
-  const sql =`select organizer_email,title,description,CONCAT("http://localhost:3000", "/upload/images/", image_url) AS image_url FROM project where process_flow="finished"`;
-  connection1.execute(sql,(err,result)=>{
-  if(err){
-   return  res.json(err)
-  }
-  return res.json(result)
+const finishedproject = async (req, res) => {
+  const sql = `SELECT organizer_email, title, description, CONCAT("http://localhost:3000", "/upload/images/", image_url) AS image_url FROM project WHERE process_flow="finished"`;
+
+  connection1.execute(sql, (err, result) => {
+      if (err) {
+          return res.status(500).json(err);
+      }
+      
+      if (!result || result.length === 0) {
+          return res.json({ message: "No finished projects found" });
+      }
+
+      return res.json(result);
   });
-  
-  }
+};
+
   const featuredproject = async (req, res) => {
-    const sql = `SELECT organizer_email, title, description, CONCAT("http://", ?, "/upload/images/", image_url) AS image_url FROM project WHERE rating IS NOT NULL ORDER BY rating DESC`;
+    const sql = `SELECT organizer_email, title, description, CONCAT("http://localhost:3000", "/upload/images/", image_url) AS image_url FROM project WHERE rating IS NOT NULL ORDER BY rating DESC`;
     
     connection1.execute(sql, [req.hostname], (err, result) => {
       if (err) {
@@ -150,7 +153,7 @@ const finishedproject = async (req,res)=>{
     });
   };
   const showevent = async (req, res) => {
-    const sql = `SELECT EventName, addressOfevent FROM events`;
+    const sql = `SELECT EventName, addressOfevent FROM events Where size !=0`;
     try {
         connection1.execute(sql, (err, result) => {
             if (err) {

@@ -1,6 +1,5 @@
 const connection = require('../../../../DB/connection.js');
 const { joineventSchema } = require('../../services/validation/validation.js');
-
 const joinevent = async (req, res) => {
     try {
         if (req.user.role !== 'organizer') {
@@ -19,47 +18,56 @@ const joinevent = async (req, res) => {
         const { title, eventName } = req.body;
         const user = req.user.email;
 
-        const checkProjectQuery = `SELECT process_flow FROM project WHERE title = ? AND organizer_email = ?`;
-        connection.execute(checkProjectQuery, [title, user], (projectErr, projectResult) => {
-            if (projectErr) {
-                return res.status(500).json({ error: projectErr.message });
+        // Check if the event exists
+        const checkEventQuery = `SELECT * FROM events WHERE EventName = ?`;
+        connection.execute(checkEventQuery, [eventName], (eventErr, eventResult) => {
+            if (eventErr) {
+                return res.status(500).json({ error: eventErr.message });
             }
-            if (projectResult.length === 0) {
-                return res.status(400).json({ message: "You don't own this project" });
-            }
-            if (projectResult[0].process_flow !== 'finished') {
-                return res.status(400).json({ message: "You can't join the event because your project hasn't finished yet!" });
+            if (eventResult.length === 0) {
+                return res.status(404).json({ message: "Event not found" });
             }
 
-            const checkEventQuery = `SELECT size FROM events WHERE EventName = ?`;
-            connection.execute(checkEventQuery, [eventName], (eventErr, eventResult) => {
-                if (eventErr) {
-                    return res.status(500).json({ error: eventErr.message });
+            const checkProjectQuery = `SELECT process_flow FROM project WHERE title = ? AND organizer_email = ?`;
+            connection.execute(checkProjectQuery, [title, user], (projectErr, projectResult) => {
+                if (projectErr) {
+                    return res.status(500).json({ error: projectErr.message });
                 }
-                if (eventResult.length === 0) {
-                    return res.status(404).json({ message: "The event does not exist" });
+                if (projectResult.length === 0) {
+                    return res.status(400).json({ message: "You don't own this project" });
                 }
-                if (eventResult[0].size === 0) {
-                    return res.status(403).json({ message: "The places are full! Sorry" });
+                if (projectResult[0].process_flow !== 'finished') {
+                    return res.status(400).json({ message: "You can't join the event because your project hasn't finished yet!" });
                 }
 
-                
-                const updateEventQuery = `UPDATE events SET size = size - 1 WHERE EventName = ?`;
-                connection.execute(updateEventQuery, [eventName], (updateErr, updateResult) => {
-                    if (updateErr) {
-                        return res.status(500).json({ error: updateErr.message });
+                // Check available places
+                const checkEventSizeQuery = `SELECT size FROM events WHERE EventName = ?`;
+                connection.execute(checkEventSizeQuery, [eventName], (sizeErr, sizeResult) => {
+                    if (sizeErr) {
+                        return res.status(500).json({ error: sizeErr.message });
+                    }
+                    if (sizeResult.length === 0 || sizeResult[0].size === 0) {
+                        return res.status(403).json({ message: "No available places for this event" });
                     }
 
-                    const updateProjectQuery = `UPDATE project SET EventName = ? WHERE title = ?`;
-                    connection.execute(updateProjectQuery, [eventName, title], (updateProjectErr, updateProjectResult) => {
-                        if (updateProjectErr) {
-                            if (updateProjectErr.errno === 1062) {
+                    const insertEventQuery = `INSERT INTO events (project_title, EventName) VALUES (?, ?)`;
+                    connection.execute(insertEventQuery, [title, eventName], (insertErr, insertResult) => {
+                        if (insertErr) {
+                            if (insertErr.errno === 1062) {
                                 return res.status(409).json({ message: "You have already joined this event" });
                             } else {
-                                return res.status(500).json({ error: updateProjectErr.message });
+                                return res.status(500).json({ error: insertErr.message });
                             }
                         }
-                        return res.status(200).json({ message: "You joined the event successfully" });
+
+                        // Update available places (size)
+                        const updateSizeQuery = `UPDATE events SET size = size - 1 WHERE EventName = ?`;
+                        connection.execute(updateSizeQuery, [eventName], (updateErr, updateResult) => {
+                            if (updateErr) {
+                                return res.status(500).json({ error: updateErr.message });
+                            }
+                            return res.status(200).json({ message: "You joined the event successfully" });
+                        });
                     });
                 });
             });

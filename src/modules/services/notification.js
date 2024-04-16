@@ -75,40 +75,58 @@ const chooseStatus = async function(req, res) {
         if (req.user.role === 'crafter') {
             return res.status(401).json("You cannot access this page");
         }
+
         const { user_email, project_title, status } = req.body;
-        
-        // Add if statement to check if status is not 'pending'
-        if (status !== 'pending') {
-            return res.status(400).json({ message: "Status should be 'pending'" });
-        }
 
-        const sql3 = `UPDATE collaboration SET status='${status}' WHERE user_email="${user_email}"`;
-
-        connection.execute(sql3, (error, result) => {
-            if (error) {
-                return res.status(500).json({ error: error });
+        const checkSQL = `SELECT * FROM collaboration WHERE user_email=? AND project_title=? AND status='accept'`;
+        connection.execute(checkSQL, [user_email, project_title], (checkErr, checkResult) => {
+            if (checkErr) {
+                return res.status(500).json({ error: checkErr });
             }
-            if (status === 'accept') {
-                const sql5 = `SELECT NumofMem, size FROM project WHERE title ='${project_title}'`;
-                connection.execute(sql5, (err, ress) => {
-                    if (err) {
-                        return res.status(500).json({ error: err });
-                    }
+            if (checkResult.length > 0) {
+                return res.status(400).json({ message: "You have already accepted this." });
+            }
 
-                    if (ress[0].NumofMem + 1 === ress[0].size) {
-                        const sql6 = `UPDATE project SET process_flow='started' WHERE title = '${project_title}'`;
-                        connection.execute(sql6);
+            // Check if project places are full
+            const checkProjectPlacesSQL = `SELECT NumofMem, size FROM project WHERE title = ?`;
+            connection.execute(checkProjectPlacesSQL, [project_title], (checkPlacesErr, checkPlacesResult) => {
+                if (checkPlacesErr) {
+                    return res.status(500).json({ error: checkPlacesErr });
+                }
+                if (checkPlacesResult.length > 0 && checkPlacesResult[0].NumofMem === checkPlacesResult[0].size) {
+                    return res.json({ message: "Places are full" });
+                }
+
+                // Proceed with updating collaboration status
+                const updateCollabSQL = `UPDATE collaboration SET status=? WHERE user_email=? AND project_title=?`;
+                connection.execute(updateCollabSQL, [status, user_email, project_title], (collabErr, collabResult) => {
+                    if (collabErr) {
+                        return res.status(500).json({ error: collabErr });
+                    }
+                    if (status === 'accept') {
+                        const updateProjectSQL = `UPDATE project SET NumofMem = NumofMem + 1 WHERE title = ?`;
+                        connection.execute(updateProjectSQL, [project_title], (projectErr, projectResult) => {
+                            if (projectErr) {
+                                return res.status(500).json({ error: projectErr });
+                            }
+
+                            // If it's the last member, update process_flow
+                            if (checkPlacesResult[0].NumofMem + 1 === checkPlacesResult[0].size) {
+                                const updateProcessFlowSQL = `UPDATE project SET process_flow='started' WHERE title = ?`;
+                                connection.execute(updateProcessFlowSQL, [project_title]);
+                            }
+                            return res.status(200).json({ message: `${status} successfully` });
+                        });
+                    } else {
+                        return res.status(200).json({ message: `${status} successfully` });
                     }
                 });
-                const sql4 = `UPDATE project SET NumofMem = NumofMem + 1 WHERE title = '${project_title}'`;
-                connection.execute(sql4);
-            }
-            return res.status(200).json({ message: `${status} successfully` });
+            });
         });
     } catch (error) {
         return res.status(500).json(error.stack);
     }
-}; 
+};
 
 
 module.exports = {notification,chooseStatus};
